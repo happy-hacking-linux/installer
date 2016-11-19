@@ -1,5 +1,57 @@
-install () {
-    pacman -S base-devel \
+prepare () {
+    title "Welcome to installation of Happy Hacking Linux distro."
+    read -p "Choose a username:" $username
+    timedatectl set-ntp true
+    success "Ready for the installation for " $username
+}
+
+formatDisk () {
+    title "Disk Format"
+    confirm "Your disk will be completely erased. Do you wish to continue?"
+    if [ $notconfirmed ]; then
+        info "Setup your disk partition and hit Control+C when you're done."
+        parted
+    else
+        parted /dev/sda mklabel msdos
+        parted /dev/sda mkpart ESP fat32 1MiB 513Mib
+        parted /dev/sda set 1 boot on
+        mkpart primary ext4 531MiB 7GB
+        mkpart primary linux-swap 7GB 100%
+        mkfs.fat -F32 /dev/sda1
+        mkfs.ext4 /dev/sda2
+        mkswap /dev/sda3
+        swapon /dev/sda3
+        success "Disk has been formatted."
+    fi
+}
+
+installSystem () {
+    title "Installing System Packages"
+    info "This will take some time depending on your internet connection."
+
+    pacstrap -y /mnt base
+    genfstab -U /mnt >> /mnt/etc/fstab
+    arch-chroot /mnt
+}
+
+afterInstallingSystem () {
+    title "Localization"
+    ln -s /usr/share/zoneinfo/Africa/Casablanca /etc/localtime
+    hwclock --systohc
+    sed -i -e '/^#en_US/s/^#//' /etc/locale.gen # uncomment lines starting with #en_US
+    locale-gen
+    echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+    echo $username > /etc/hostname
+    echo "127.0.1.1	$(username).localdomain	$(username)" >> /etc/hosts
+}
+
+installGRUB () {
+    pacman -Sy grub
+    grub-install --target=i386-pc /dev/sda1
+}
+
+installPackages () {
+    pacman -Sy base-devel \
            curl \
            wget \
            git \
@@ -17,12 +69,6 @@ install () {
            rxvt-unicode \
            emacs \
            vim
-
-    installNode
-    installZSH
-    installFonts
-    installSpacemacs
-    installAwesomeVim
 }
 
 installNode () {
@@ -64,3 +110,54 @@ installAwesomeVim () {
     git clone git://github.com/amix/vimrc.git ~/.vim_runtime
     sh ~/.vim_runtime/install_awesome_vimrc.sh
 }
+
+info () {
+    colored "$1" "90"
+}
+
+title () {
+    echo ""
+    row "\033[1m$1\033[0m"
+    echo ""
+  }
+
+colored () {
+    local color="\033[$2m"
+    local nc='\033[0m'
+    row "${color}$1${nc}"
+}
+
+error () {
+    colored "Error: $1" "31"
+    echo ""
+    exit 1
+}
+
+success () {
+    colored "$1" "32"
+    echo ""
+}
+
+confirm () {
+    read -p "    $1 (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        confirmed=1
+        notconfirmed=""
+    else
+        confirmed=""
+        notconfirmed=1
+    fi
+}
+
+prepare
+formatDisk
+installArch
+installGRUB
+installPackages
+installNode
+installZSH
+installFonts
+installSpacemacs
+installAwesomeVim
