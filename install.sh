@@ -12,12 +12,12 @@ formatDisk () {
         info "Setup your disk partition and hit Control+C when you're done."
         parted
     else
-        parted /dev/sda <<EOF
-               mklabel msdos
-               mkpart ESP fat32 1MiB 513Mib
-               set 1 boot on
-               mkpart primary ext4 531MiB 7GB
-               mkpart primary linux-swap 7GB 100%
+        parted /dev/sda --script -- <<EOF
+mklabel msdos
+mkpart primary ext4 0 100%
+set 1 boot on
+print
+quit
 EOF
 
         mkfs.fat -F32 /dev/sda1
@@ -39,11 +39,12 @@ installSystem () {
 
 afterInstallingSystem () {
     title "Localization"
-    ln -s /usr/share/zoneinfo/Africa/Casablanca /etc/localtime
+    tzselect
     hwclock --systohc
     sed -i -e '/^#en_US/s/^#//' /etc/locale.gen # uncomment lines starting with #en_US
     locale-gen
     echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+    echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
     echo $username > /etc/hostname
     echo "127.0.1.1	$(username).localdomain	$(username)" >> /etc/hosts
 }
