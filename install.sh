@@ -1,30 +1,30 @@
 prepare () {
     title "Welcome to installation of Happy Hacking Linux distro."
-    read -p "Choose a username: " $username
+    read -p "Choose a username > " $username
+    read -p "Dotfiles repo if you have one > " $dotfilesRepo
     timedatectl set-ntp true
-    success "Ready for the installation for " $username
+    success "Cool!"
+    formatDisk
 }
 
 formatDisk () {
     title "Disk Format"
     confirm "Your disk will be completely erased. Do you wish to continue?"
-    if [ $notconfirmed ]; then
-        info "Setup your disk partition and hit Control+C when you're done."
-        parted
-        read -p "Boot Partition: /dev/" $bootpt
-    else
-        parted /dev/sda --script <<EOF
-mklabel msdos
-mkpart primary ext4 0% 100%
-set 1 boot on
-print
-exit
-EOF
 
+    if [ $notconfirmed ]; then
+        info "Setup your disk partition with GNU Parted, exit when you're done."
+        parted
+        read -p "Boot Partition > /dev/" $bootpt
+    else
+        parted /dev/sda --script mklabel msdos \
+               mkpart primary ext4 0% 100% \
+               set 1 boot on \
         mkfs.ext4 /dev/sda1
         bootpt=sda1
         success "Disk has been formatted."
     fi
+
+    installSystem
 }
 
 installSystem () {
@@ -34,6 +34,7 @@ installSystem () {
     pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
     arch-chroot /mnt
+    afterInstallingSystem
 }
 
 afterInstallingSystem () {
@@ -46,11 +47,13 @@ afterInstallingSystem () {
     echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
     echo $username > /etc/hostname
     echo "127.0.1.1	$(username).localdomain	$(username)" >> /etc/hosts
+    installGRUB
 }
 
 installGRUB () {
     pacman -Sy --noconfirm grub
     grub-install --target=i386-pc /dev/$bootpt
+    installPackages
 }
 
 installPackages () {
@@ -71,7 +74,14 @@ installPackages () {
            dmenu \
            rxvt-unicode \
            emacs \
-           vim
+           vim \
+           go
+
+    installZSH
+    installNode
+    installFonts
+    installSpacemacs
+    installAwesomeVim
 }
 
 installNode () {
@@ -114,6 +124,10 @@ installAwesomeVim () {
     sh ~/.vim_runtime/install_awesome_vimrc.sh
 }
 
+row () {
+    echo -e "    $1"
+}
+
 info () {
     colored "$1" "90"
 }
@@ -128,7 +142,7 @@ colored () {
     #local color="\033[$2m"
     #local nc='\033[0m'
     #FIXME: colors are not working
-    echo "$1"
+    row "$1"
 }
 
 error () {
@@ -138,12 +152,13 @@ error () {
 }
 
 success () {
+    echo ""
     colored "$1" "32"
     echo ""
 }
 
 confirm () {
-    read -p "$1 (y/n) " -n 1 -r
+    read -p "    $1 (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
@@ -156,13 +171,3 @@ confirm () {
 }
 
 prepare
-formatDisk
-installSystem
-afterInstallingSystem
-installGRUB
-#installPackages
-#installNode
-#installZSH
-#installFonts
-#installSpacemacs
-#installAwesomeVim
