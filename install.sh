@@ -116,15 +116,14 @@ info () {
 }
 
 title () {
-    echo ""
-    row "\033[1m$1\033[0m"
-    echo ""
-  }
+    echo "\n$1\n"
+}
 
 colored () {
-    local color="\033[$2m"
-    local nc='\033[0m'
-    row "${color}$1${nc}"
+    #local color="\033[$2m"
+    #local nc='\033[0m'
+    #FIXME: colors are not working
+    echo "$1"
 }
 
 error () {
