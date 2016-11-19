@@ -13,7 +13,7 @@ formatDisk () {
         parted
         read -p "Boot Partition: /dev/" $bootpt
     else
-        parted /dev/sda --script -- <<EOF
+        parted /dev/sda --script <<EOF
 mklabel msdos
 mkpart primary ext4 0% 100%
 set 1 boot on
