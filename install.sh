@@ -22,7 +22,7 @@ exit
 EOF
 
         mkfs.ext4 /dev/sda1
-        $bootpt=sda1
+        bootpt=sda1
         success "Disk has been formatted."
     fi
 }
@@ -49,12 +49,12 @@ afterInstallingSystem () {
 }
 
 installGRUB () {
-    pacman -Sy grub
+    pacman -S --noconfirm grub
     grub-install --target=i386-pc /dev/$bootpt
 }
 
 installPackages () {
-    pacman -Sy base-devel \
+    pacman -S --noconfirm base-devel \
            curl \
            wget \
            git \
@@ -89,7 +89,7 @@ installZSH () {
 }
 
 installFonts () {
-    pacman -S ttf-inconsolata ttf-symbola ttf-ancient-fonts ttf-bitstream-vera
+    pacman -S --noconfirm ttf-inconsolata ttf-symbola ttf-ancient-fonts ttf-bitstream-vera
     installMonacoFont
     installEmojiFont
 }
