@@ -1,12 +1,21 @@
+[[ -f ./config ]] && source ./config
+touch ./config
+
 prepare () {
-    echo "                        =^.^="
-    echo "Welcome to installation of Happy Hacking Linux distro."
-    echo "                      v11.2016"
+    echo ""
+    echo ""
+    echo "                           =^.^="
+    echo "    Welcome to installation of Happy Hacking Linux distro."
+    echo "                         v11.2016"
     echo ""
 
     read -p "    Choose a username > " $username
     read -p "    Dotfiles repo if you have one > " $dotfilesRepo
     timedatectl set-ntp true > /dev/null
+
+    echo "username=$(username)\ndotfilesRepo=$(dotfilesRepo)" > ./config
+    setvar "username" $username
+    setvar "dotfilesRepo" $dotfilesRepo
     success "Cool!"
 }
 
@@ -34,7 +43,7 @@ installSystem () {
     title "Installing System Packages"
 
     mount /dev/$systempt /mnt
-    pacstrap /mnt base > /dev/null || error "Can not install the base system into your disk"
+    pacstrap /mnt base || error "Can not install the base system into your disk"
     genfstab -U /mnt >> /mnt/etc/fstab
     arch-chroot /mnt
 
@@ -144,11 +153,11 @@ installDotfiles () {
         success "Linked all your dotfiles!"
     fi
 
-    if [ -f /home/$username/dotfiles/happy-hacking-post-install.sh ]; then {
+    if [ -f /home/$username/dotfiles/happy-hacking-post-install.sh ]; then
         title "Running Your Personal Install Script"
         sh ./dotfiles/happy-hacking-post-install.sh
         success "Done!"
-    }
+    fi
 }
 
 configureLocalization () {
