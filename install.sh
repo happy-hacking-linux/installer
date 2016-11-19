@@ -12,12 +12,13 @@ formatDisk () {
         info "Setup your disk partition and hit Control+C when you're done."
         parted
     else
-        parted /dev/sda \
-               mklabel msdos \
-               mkpart ESP fat32 1MiB 513Mib \
-               set 1 boot on \
-               mkpart primary ext4 531MiB 7GB \
+        parted /dev/sda <<EOF
+               mklabel msdos
+               mkpart ESP fat32 1MiB 513Mib
+               set 1 boot on
+               mkpart primary ext4 531MiB 7GB
                mkpart primary linux-swap 7GB 100%
+EOF
 
         mkfs.fat -F32 /dev/sda1
         mkfs.ext4 /dev/sda2
@@ -118,7 +119,9 @@ info () {
 }
 
 title () {
-    echo "\n$1\n"
+    echo ""
+    echo "$1"
+    echo ""
 }
 
 colored () {
@@ -140,7 +143,7 @@ success () {
 }
 
 confirm () {
-    read -p "    $1 (y/n) " -n 1 -r
+    read -p "$1 (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
