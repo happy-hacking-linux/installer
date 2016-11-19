@@ -1,87 +1,113 @@
 prepare () {
-    title "Welcome to installation of Happy Hacking Linux distro."
-    read -p "Choose a username > " $username
-    read -p "Dotfiles repo if you have one > " $dotfilesRepo
-    timedatectl set-ntp true
+    echo "                        =^.^="
+    echo "Welcome to installation of Happy Hacking Linux distro."
+    echo "                      v11.2016"
+    echo ""
+
+    read -p "    Choose a username > " $username
+    read -p "    Dotfiles repo if you have one > " $dotfilesRepo
+    timedatectl set-ntp true > /dev/null
     success "Cool!"
-    formatDisk
 }
 
 formatDisk () {
-    title "Disk Format"
+    title "Setup Disk Partitions"
     confirm "Your disk will be completely erased. Do you wish to continue?"
 
     if [ $notconfirmed ]; then
-        info "Setup your disk partition with GNU Parted, exit when you're done."
-        parted
-        read -p "Boot Partition > /dev/" $bootpt
+        info "Customize your disk partition with GNU Parted, exit when you're done."
+        parted || error "Disk partitioning was failed, try again."
+        read -p "    Boot Partition > /dev/" $bootpt
+        read -p "    System Partition > /dev/" $systempt
     else
         parted /dev/sda --script mklabel msdos \
                mkpart primary ext4 0% 100% \
-               set 1 boot on \
-        mkfs.ext4 /dev/sda1
+               set 1 boot on > /dev/null || error "Failed to setup disk partitions"
+        mkfs.ext4 /dev/sda1 > /dev/null || error "Failed to format the disk"
         bootpt=sda1
+        systempt=sda1
         success "Disk has been formatted."
     fi
-
-    installSystem
 }
 
 installSystem () {
     title "Installing System Packages"
-    info "This will take some time depending on your internet connection."
 
-    pacstrap /mnt base
+    mount /dev/$systempt /mnt
+    pacstrap /mnt base > /dev/null || error "Can not install the base system into your disk"
     genfstab -U /mnt >> /mnt/etc/fstab
     arch-chroot /mnt
-    afterInstallingSystem
-}
 
-afterInstallingSystem () {
-    title "Localization"
-    tzselect
-    hwclock --systohc
-    sed -i -e '/^#en_US/s/^#//' /etc/locale.gen # uncomment lines starting with #en_US
-    locale-gen
-    echo "LANG=en_US.UTF-8" >> /etc/locale.conf
-    echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
-    echo $username > /etc/hostname
-    echo "127.0.1.1	$(username).localdomain	$(username)" >> /etc/hosts
-    installGRUB
+    success "Core system has been installed."
 }
 
 installGRUB () {
-    pacman -Sy --noconfirm grub
+    title "Installing system boot (GRUB)..."
+
+    pacman -Sy --noconfirm grub > /dev/null
     grub-install --target=i386-pc /dev/$bootpt
-    installPackages
 }
 
 installPackages () {
-    pacman -Sy --noconfirm base-devel \
-           curl \
-           wget \
-           git \
-           tmux \
-           zsh \
-           checkinstall \
-           firefox \
-           xmonad \
-           xmobar \
-           feh \
-           scrot \
-           moc \
-           newsbeuter \
-           dmenu \
-           rxvt-unicode \
-           emacs \
-           vim \
-           go
+    title "Install Extras"
 
-    installZSH
-    installNode
-    installFonts
-    installSpacemacs
-    installAwesomeVim
+    info "Installing updates..."
+    sudo pacman -Syu > /dev/null || error "Can not install updates."
+
+    info "Installing extra packages for happy hacking"
+    sudo pacman -Sy --noconfirm base-devel \
+         net-tools \
+         pkgfile \
+         xf86-video-vesa \
+         xorg-server \
+         xorg-server-utils \
+         xorg-apps \
+         ttf-dejavu \
+         ttf-droid \
+         ttf-inconsolata \
+         ttf-symbola \
+         ttf-ancient-fonts \
+         ttf-bitstream-vera \
+         terminus-font \
+         curl \
+         wget \
+         git \
+         tmux \
+         zsh \
+         checkinstall \
+         firefox \
+         xmonad \
+         xmobar \
+         feh \
+         scrot \
+         moc \
+         newsbeuter \
+         dmenu \
+         rxvt-unicode \
+         emacs \
+         vim \
+         go > /dev/null || error "Failed to complete installing extra packages"
+
+    installZSH > /dev/null || error "Can not install ZSH"
+    installNode > /dev/null || error "Can not install NodeJS"
+    installFonts > /dev/null || error "Can not install fonts"
+    installSpacemacs > /dev/null || error "Can not install Spacemacs"
+    installVim > /dev/null || error "Can not install Vim"
+
+    success "Hacking packages installed successfully."
+}
+
+installVirtualBox () {
+    confirm "Is this a VirtualBox installation?"
+    if [ $confirmed ]; then
+        title "VirtualBox Setup"
+        info "Installing VirtualBox Guest Additions..."
+        sudo pacman -S virtualbox-guest-utils virtualbox-guest-modules virtualbox-guest-modules-lts virtualbox-guest-dkms
+
+        info "Configuring..."
+        echo "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
+        sudo systemctl enable vboxservice.service
+    fi
 }
 
 installNode () {
@@ -98,30 +124,72 @@ installZSH () {
 	  chsh -s $(which zsh)
 }
 
-installFonts () {
-    pacman -Sy --noconfirm ttf-inconsolata ttf-symbola ttf-ancient-fonts ttf-bitstream-vera
-    installMonacoFont
-    installEmojiFont
-}
-
-installMonacoFont () {
-    ../install-font http://jorrel.googlepages.com/Monaco_Linux.ttf
-}
-
-installEmojiFont () {
-    wget https://github.com/eosrei/emojione-color-font/releases/download/v1.3/EmojiOneColor-SVGinOT-Linux-1.3.tar.gz -O /tmp/emojione-font.tar.gz
-    cd /tmp
-    tar zxf emojione-font.tar.gz
-    cd Emoji* && ./install.sh
-}
-
 installSpacemacs () {
     git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
 }
 
-installAwesomeVim () {
+installVim () {
     git clone git://github.com/amix/vimrc.git ~/.vim_runtime
     sh ~/.vim_runtime/install_awesome_vimrc.sh
+}
+
+installDotfiles () {
+    if [[ -z "${dotfilesRepo// }" ]]; then
+        title "Installing your dotfiles"
+
+        cd /home/$username
+        git clone $dotfiles
+        ln -s /home/$username/dotfiles/.* /home/$username
+
+        success "Linked all your dotfiles!"
+    fi
+
+    if [ -f /home/$username/dotfiles/happy-hacking-post-install.sh ]; then {
+        title "Running Your Personal Install Script"
+        sh ./dotfiles/happy-hacking-post-install.sh
+        success "Done!"
+    }
+}
+
+configureLocalization () {
+    title "Localization"
+
+    tzselect
+    hwclock --systohc
+    sed -i -e '/^#en_US/s/^#//' /etc/locale.gen # uncomment lines starting with #en_US
+    locale-gen
+    echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+    echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
+    echo $username > /etc/hostname
+    echo "127.0.1.1	$(username).localdomain	$(username)" >> /etc/hosts
+}
+
+configureUsers () {
+    title "Create User $(username)"
+    pacman -
+
+    useradd -m -s /bin/zsh $username
+    echo "$(username) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+    su - $username
+
+    success "Now you're logged in as $(username). Let's set you a password."
+    passwd $username
+
+    success "Done, now we can continue installing."
+}
+
+switchToLTSKernel () {
+    title "Finally, we're switching to Linux LTS Kernel..."
+    pacman -S --noconfirm linux-lts linux-lts-headers > /dev/null || error "Can not install Linux LTS Kernel"
+
+    sed -i '/GRUB_DEFAULT=0/c\GRUB_DEFAULT=saved' /etc/default/grub
+    sed -i '/GRUB_GFXMODE=auto/c\GRUB_GFXMODE=1024x768x32' /etc/default/grub
+    sed -i -e '/^#GRUB_COLOR_NORMAL/s/^#//' /etc/locale.gen
+    sed -i -e '/^#GRUB_COLOR_HIGHLIGHT/s/^#//' /etc/locale.gen
+    echo "GRUB_SAVEDEFAULT=true" >> /etc/default/grub
+    echo "GRUB_DISABLE_SUBMENU=y" >> /etc/default/grub
+
+    success "Done, we got a more stable kernel now."
 }
 
 row () {
@@ -146,6 +214,7 @@ colored () {
 }
 
 error () {
+    echo ""
     colored "Error: $1" "31"
     echo ""
     exit 1
@@ -171,3 +240,22 @@ confirm () {
 }
 
 prepare
+formatDisk
+installSystem
+installGRUB
+configureLocalization
+configureUsers
+installPackages
+installDotfiles
+switchToLTSKernel
+
+echo ""
+echo "         =^.^="
+echo "Installation is Complete!"
+
+confirm "Would you like to restart the system?"
+if [ $confirmed ]; then
+    sudo reboot
+else
+    row "Ok, you can reboot whenever you want. Bye!"
+fi
