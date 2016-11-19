@@ -1,6 +1,6 @@
 prepare () {
     title "Welcome to installation of Happy Hacking Linux distro."
-    read -p "Choose a username:" $username
+    read -p "Choose a username: " $username
     timedatectl set-ntp true
     success "Ready for the installation for " $username
 }
@@ -12,11 +12,13 @@ formatDisk () {
         info "Setup your disk partition and hit Control+C when you're done."
         parted
     else
-        parted /dev/sda mklabel msdos
-        parted /dev/sda mkpart ESP fat32 1MiB 513Mib
-        parted /dev/sda set 1 boot on
-        mkpart primary ext4 531MiB 7GB
-        mkpart primary linux-swap 7GB 100%
+        parted /dev/sda \
+               mklabel msdos \
+               mkpart ESP fat32 1MiB 513Mib \
+               set 1 boot on \
+               mkpart primary ext4 531MiB 7GB \
+               mkpart primary linux-swap 7GB 100%
+
         mkfs.fat -F32 /dev/sda1
         mkfs.ext4 /dev/sda2
         mkswap /dev/sda3
