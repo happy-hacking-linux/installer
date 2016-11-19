@@ -11,19 +11,18 @@ formatDisk () {
     if [ $notconfirmed ]; then
         info "Setup your disk partition and hit Control+C when you're done."
         parted
+        read -p "Boot Partition: /dev/" $bootpt
     else
         parted /dev/sda --script -- <<EOF
 mklabel msdos
-mkpart primary ext4 0 100%
+mkpart primary ext4 0% 100%
 set 1 boot on
 print
-quit
+exit
 EOF
 
-        mkfs.fat -F32 /dev/sda1
-        mkfs.ext4 /dev/sda2
-        mkswap /dev/sda3
-        swapon /dev/sda3
+        mkfs.ext4 /dev/sda1
+        $bootpt=sda1
         success "Disk has been formatted."
     fi
 }
@@ -51,7 +50,7 @@ afterInstallingSystem () {
 
 installGRUB () {
     pacman -Sy grub
-    grub-install --target=i386-pc /dev/sda1
+    grub-install --target=i386-pc /dev/$bootpt
 }
 
 installPackages () {
