@@ -31,7 +31,7 @@ installSystem () {
     title "Installing System Packages"
     info "This will take some time depending on your internet connection."
 
-    pacstrap -y /mnt base
+    pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
     arch-chroot /mnt
 }
