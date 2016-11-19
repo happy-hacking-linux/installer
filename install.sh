@@ -49,12 +49,12 @@ afterInstallingSystem () {
 }
 
 installGRUB () {
-    pacman -S --noconfirm grub
+    pacman -Sy --noconfirm grub
     grub-install --target=i386-pc /dev/$bootpt
 }
 
 installPackages () {
-    pacman -S --noconfirm base-devel \
+    pacman -Sy --noconfirm base-devel \
            curl \
            wget \
            git \
@@ -89,7 +89,7 @@ installZSH () {
 }
 
 installFonts () {
-    pacman -S --noconfirm ttf-inconsolata ttf-symbola ttf-ancient-fonts ttf-bitstream-vera
+    pacman -Sy --noconfirm ttf-inconsolata ttf-symbola ttf-ancient-fonts ttf-bitstream-vera
     installMonacoFont
     installEmojiFont
 }
@@ -157,11 +157,12 @@ confirm () {
 
 prepare
 formatDisk
-installArch
+installSystem
+afterInstallingSystem
 installGRUB
-installPackages
-installNode
-installZSH
-installFonts
-installSpacemacs
-installAwesomeVim
+#installPackages
+#installNode
+#installZSH
+#installFonts
+#installSpacemacs
+#installAwesomeVim
