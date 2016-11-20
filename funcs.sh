@@ -1,10 +1,24 @@
 DISTRO_DL="https://git.io/vXbTE"
 
+init () {
+    timedetect1 set-ntp true
+}
+
 autoPartition () {
-    parted /dev/sda --script mklabel msdos \
-           mkpart primary ext4 0% 100% \
-           set 1 boot on 2> /tmp/err || errorDialog "Failed to create disk partitions"
-    mkfs.ext4 /dev/sda1 > /dev/null 2> /tmp/error || error "Failed to format the root partition"
+    parted $1 --script mklabel msdos \
+           mkpart primary ext4 1MiB 512MiB \
+           set 1 boot on \
+           mkpart primary ext4 512MiB 100% 2> /tmp/err || errorDialog "Failed to create disk partitions"
+
+    yes | mkfs.ext4 "${1}1" > /dev/null 2> /tmp/error || error "Failed to format the boot partition"
+    yes | mkfs.ext4 "${1}2" > /dev/null 2> /tmp/error || error "Failed to format the root partition"
+
+    mount "${1}2" /mnt
+    mkdir /mnt/boot
+    mount "${1}1" /mnt/boot
+
+    setvar "boot-partition" "${1}1"
+    setvar "system-partition" "${1}2"
 }
 
 installCoreSystem () {
@@ -14,7 +28,6 @@ installCoreSystem () {
     getvar "boot-partition"
     bootpt=$value
 
-    mount $systempt /mnt
     pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
 
@@ -31,7 +44,7 @@ EOF
 installGRUB () {
     pacman -Sy --noconfirm grub 2> /tmp/err || errorDialog "Failed to install GRUB"
     getvar "boot-partition"
-    grub-install --target=i386-pc $value 2> /tmp/err || errorDialog "Failed to install GRUB"
+    grub-install --target=i386-pc --recheck $value 2> /tmp/err || errorDialog "Failed to install GRUB"
 }
 
 localize () {
@@ -46,7 +59,7 @@ localize () {
 }
 
 createUser () {
-    useradd -m -s /bin/bash $1
+    useradd -m -s /usr/bin/zsh $1
     echo "$1:$2" | chpasswd
 
     echo "$1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -86,7 +99,7 @@ installNode () {
 	  nvm alias default 0.10
 }
 
-installZSH () {
+installOhMyZSH () {
 	  curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
 	  echo "source ~/dotfiles/.zshrc \nsource ~/dotfiles/.nvm \nsource ~/localbin/bashmarks/bashmarks.sh\nsource ~/.nvm/nvm.sh" > ~/.zshrc
 	  chsh -s $(which zsh)

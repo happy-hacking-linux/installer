@@ -40,14 +40,33 @@ extrasMenu () {
                       6 "VirtualBox Guest Additions")
 }
 
+diskMenu () {
+    disks=$(lsblk -r | grep part | cut -d" " -f1,4 | nl)
+    disksArray=()
+    while read i name size; do
+        disksArray+=($i "$name $size")
+    done <<< "$disks"
+
+    selected=$(dialog --stdout \
+                      --title "Installation Disk" \
+                      --backtitle "Happy Hacking Linux" \
+                      --ok-label "Next" \
+                      --cancel-label "Main Menu" \
+                      --menu "Select A Disk" \
+                      "${ar[@]}")
+
+    selected=$(lsblk -r | grep part | cut -d" " -f1 | sed -n "${selected}p")
+    selected="/dev/${selected}"
+}
+
 partitionMenu () {
     selected=$(dialog --stdout \
                       --title "Setup Disk Partitions" \
                       --backtitle "Happy Hacking Linux" \
                       --ok-label "Select" \
                       --cancel-label "Main Menu" \
-                      --menu "We need to prepare your disk for installation. If you got nothing to lose in your hard disk, just go with the simple option and format the disk completely. Or, choose one of the tools to modify your disk in your own risk." 17 55 5 \
-                      1 "Simple: Erase Everything" \
+                      --menu "How do you want to create partitions? If you got nothing to lose in $1, just go with the simple option and format the disk completely. Or, choose one of the tools to modify your disk in your own risk." 17 55 5 \
+                      1 "Simple: Erase Everything on $1" \
                       2 "Manual: Using cfdisk" \
                       3 "Manual: Using fdisk" \
                       4 "Manual: Using GNU Parted")
@@ -61,8 +80,8 @@ partitionSelectionForm () {
                     --nocancel \
 	                  --form "" \
                     7 50 0 \
-	                  "/boot" 1 1	"/dev/sda1" 	1 10 45 0 \
-	                  "/"    2 1	"/dev/sda1"  	2 10 45 0)
+	                  "/boot" 1 1	"${1}1" 	1 10 45 0 \
+	                  "/"    2 1	"${1}1"  	2 10 45 0)
 
     bootpt=$(echo "$values" | head -n1)
     systempt=$(echo "$values" | tail -n1)
@@ -97,14 +116,14 @@ usernameDialog () {
 
 passwordDialog () {
     password=$(dialog --stdout \
-                           --title "=^.^=" \
+                           --title "Creating User" \
                            --backtitle "Happy Hacking Linux" \
                            --ok-label "Done" \
                            --nocancel \
                            --passwordbox "Type a new password:" 8 50)
 
     passwordRepeat=$(dialog --stdout \
-                            --title "=^.^=" \
+                            --title "Creating User" \
                             --backtitle "Happy Hacking Linux" \
                             --ok-label "Done" \
                             --nocancel \

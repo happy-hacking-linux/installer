@@ -128,22 +128,22 @@ afterCoreInstallStep () {
 }
 
 partitionStep () {
-    partitionMenu
+    diskMenu
+    disk=$selected
+
+    partitionMenu $disk
 
     if [ "$selected" = "1" ]; then
-        autoPartition
-        mkfs.ext4 /dev/sda1 > /dev/null 2> /tmp/error || error "Failed to format the disk"
-        setvar "boot-partition" "/dev/sda1"
-        setvar "system-partition" "/dev/sda1"
+        autoPartition $disk
     elif [ "$selected" = "2" ]; then
-        cfdisk
-        partitionSelectionForm
+        cfdisk $disk
+        partitionSelectionForm $disk
     elif [ "$selected" = "3" ]; then
-        fdisk /dev/sda
-        partitionSelectionForm
+        fdisk $disk
+        partitionSelectionForm $disk
     elif [ "$selected" = "4" ]; then
-        parted /dev/sda
-        partitionSelectionForm
+        parted $disk
+        partitionSelectionForm $disk
     elif [ "$selected" = "5" ]; then
         mainMenuStep
     else
@@ -154,6 +154,7 @@ partitionStep () {
 }
 
 startingStep () {
+    init
     welcomeMenu
 
     if [ "$selected" = "1" ]; then

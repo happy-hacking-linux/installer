@@ -10,11 +10,25 @@ getvar () {
 }
 DISTRO_DL="https://git.io/vXbTE"
 
+init () {
+    timedetect1 set-ntp true
+}
+
 autoPartition () {
-    parted /dev/sda --script mklabel msdos \
-           mkpart primary ext4 0% 100% \
-           set 1 boot on 2> /tmp/err || errorDialog "Failed to create disk partitions"
-    mkfs.ext4 /dev/sda1 > /dev/null 2> /tmp/error || error "Failed to format the root partition"
+    parted $1 --script mklabel msdos \
+           mkpart primary ext4 1MiB 512MiB \
+           set 1 boot on \
+           mkpart primary ext4 512MiB 100% 2> /tmp/err || errorDialog "Failed to create disk partitions"
+
+    yes | mkfs.ext4 "${1}1" > /dev/null 2> /tmp/error || error "Failed to format the boot partition"
+    yes | mkfs.ext4 "${1}2" > /dev/null 2> /tmp/error || error "Failed to format the root partition"
+
+    mount "${1}2" /mnt
+    mkdir /mnt/boot
+    mount "${1}1" /mnt/boot
+
+    setvar "boot-partition" "${1}1"
+    setvar "system-partition" "${1}2"
 }
 
 installCoreSystem () {
@@ -24,7 +38,6 @@ installCoreSystem () {
     getvar "boot-partition"
     bootpt=$value
 
-    mount $systempt /mnt
     pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
 
@@ -41,7 +54,7 @@ EOF
 installGRUB () {
     pacman -Sy --noconfirm grub 2> /tmp/err || errorDialog "Failed to install GRUB"
     getvar "boot-partition"
-    grub-install --target=i386-pc $value 2> /tmp/err || errorDialog "Failed to install GRUB"
+    grub-install --target=i386-pc --recheck $value 2> /tmp/err || errorDialog "Failed to install GRUB"
 }
 
 localize () {
@@ -56,7 +69,7 @@ localize () {
 }
 
 createUser () {
-    useradd -m -s /bin/bash $1
+    useradd -m -s /usr/bin/zsh $1
     echo "$1:$2" | chpasswd
 
     echo "$1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -96,7 +109,7 @@ installNode () {
 	  nvm alias default 0.10
 }
 
-installZSH () {
+installOhMyZSH () {
 	  curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
 	  echo "source ~/dotfiles/.zshrc \nsource ~/dotfiles/.nvm \nsource ~/localbin/bashmarks/bashmarks.sh\nsource ~/.nvm/nvm.sh" > ~/.zshrc
 	  chsh -s $(which zsh)
@@ -199,14 +212,33 @@ extrasMenu () {
                       6 "VirtualBox Guest Additions")
 }
 
+diskMenu () {
+    disks=$(lsblk -r | grep part | cut -d" " -f1,4 | nl)
+    disksArray=()
+    while read i name size; do
+        disksArray+=($i "$name $size")
+    done <<< "$disks"
+
+    selected=$(dialog --stdout \
+                      --title "Installation Disk" \
+                      --backtitle "Happy Hacking Linux" \
+                      --ok-label "Next" \
+                      --cancel-label "Main Menu" \
+                      --menu "Select A Disk" \
+                      "${ar[@]}")
+
+    selected=$(lsblk -r | grep part | cut -d" " -f1 | sed -n "${selected}p")
+    selected="/dev/${selected}"
+}
+
 partitionMenu () {
     selected=$(dialog --stdout \
                       --title "Setup Disk Partitions" \
                       --backtitle "Happy Hacking Linux" \
                       --ok-label "Select" \
                       --cancel-label "Main Menu" \
-                      --menu "We need to prepare your disk for installation. If you got nothing to lose in your hard disk, just go with the simple option and format the disk completely. Or, choose one of the tools to modify your disk in your own risk." 17 55 5 \
-                      1 "Simple: Erase Everything" \
+                      --menu "How do you want to create partitions? If you got nothing to lose in $1, just go with the simple option and format the disk completely. Or, choose one of the tools to modify your disk in your own risk." 17 55 5 \
+                      1 "Simple: Erase Everything on $1" \
                       2 "Manual: Using cfdisk" \
                       3 "Manual: Using fdisk" \
                       4 "Manual: Using GNU Parted")
@@ -220,8 +252,8 @@ partitionSelectionForm () {
                     --nocancel \
 	                  --form "" \
                     7 50 0 \
-	                  "/boot" 1 1	"/dev/sda1" 	1 10 45 0 \
-	                  "/"    2 1	"/dev/sda1"  	2 10 45 0)
+	                  "/boot" 1 1	"${1}1" 	1 10 45 0 \
+	                  "/"    2 1	"${1}1"  	2 10 45 0)
 
     bootpt=$(echo "$values" | head -n1)
     systempt=$(echo "$values" | tail -n1)
@@ -256,14 +288,14 @@ usernameDialog () {
 
 passwordDialog () {
     password=$(dialog --stdout \
-                           --title "=^.^=" \
+                           --title "Creating User" \
                            --backtitle "Happy Hacking Linux" \
                            --ok-label "Done" \
                            --nocancel \
                            --passwordbox "Type a new password:" 8 50)
 
     passwordRepeat=$(dialog --stdout \
-                            --title "=^.^=" \
+                            --title "Creating User" \
                             --backtitle "Happy Hacking Linux" \
                             --ok-label "Done" \
                             --nocancel \
@@ -435,22 +467,22 @@ afterCoreInstallStep () {
 }
 
 partitionStep () {
-    partitionMenu
+    diskMenu
+    disk=$selected
+
+    partitionMenu $disk
 
     if [ "$selected" = "1" ]; then
-        autoPartition
-        mkfs.ext4 /dev/sda1 > /dev/null 2> /tmp/error || error "Failed to format the disk"
-        setvar "boot-partition" "/dev/sda1"
-        setvar "system-partition" "/dev/sda1"
+        autoPartition $disk
     elif [ "$selected" = "2" ]; then
-        cfdisk
-        partitionSelectionForm
+        cfdisk $disk
+        partitionSelectionForm $disk
     elif [ "$selected" = "3" ]; then
-        fdisk /dev/sda
-        partitionSelectionForm
+        fdisk $disk
+        partitionSelectionForm $disk
     elif [ "$selected" = "4" ]; then
-        parted /dev/sda
-        partitionSelectionForm
+        parted $disk
+        partitionSelectionForm $disk
     elif [ "$selected" = "5" ]; then
         mainMenuStep
     else
@@ -461,6 +493,7 @@ partitionStep () {
 }
 
 startingStep () {
+    init
     welcomeMenu
 
     if [ "$selected" = "1" ]; then
