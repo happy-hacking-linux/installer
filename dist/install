@@ -31,7 +31,7 @@ installCoreSystem () {
     arch-chroot /mnt <<EOF
 pacman -Sy --noconfirm dialog
 cd /usr/local/installer
-./install
+./install continue
 EOF
 }
 
@@ -423,6 +423,9 @@ installExtraPackagesStep () {
 
 coreInstallStep () {
     dialog --infobox "Installing core system packages, please wait..." 10 50; installCoreSystem
+}
+
+afterCoreInstallStep () {
     switchToLTSStep
     installExtraPackagesStep
     installBootStep
@@ -464,5 +467,8 @@ startingStep () {
     fi
 }
 
-
-startingStep
+if [ "$command" = "continue" ]; then
+    afterCoreInstallStep
+else
+    startingStep
+fi
