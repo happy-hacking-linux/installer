@@ -11,6 +11,7 @@ installCoreSystem () {
     pacstrap /mnt base 2> /tmp/err || errorDialog "Installing core packages failed. Return to main menu and try installing this step again."
     genfstab -U /mnt >> /mnt/etc/fstab
     arch-chroot /mnt
+    pacman --noconfirm -Sy dialog > /dev/null
 }
 
 installGRUB () {
