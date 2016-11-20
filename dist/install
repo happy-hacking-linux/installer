@@ -145,7 +145,7 @@ v         moc \
 source ./vars.sh
 
 welcomeMenu () {
-    dialog --title "=^.^=" \
+g    dialog --title "=^.^=" \
            --backtitle "Happy Hacking Linux" \
            --defaultno \
            --no-label "Next Step" \
@@ -274,7 +274,7 @@ passwordDialog () {
 errorDialog () {
     echo "Message: $1\nOutput: \n" | cat - /tmp/err > /tmp/err.bak && mv /tmp/err.bak /tmp/err
 
-    dialog --title "OOps, there was an error" \
+    dialog --title "Oops, there was an error" \
            --backtitle "Happy Hacking Linux" \
            --textbox /tmp/err 20 50
 
