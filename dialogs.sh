@@ -21,7 +21,7 @@ mainMenu () {
                       3 "Install Boot (GRUB)" \
                       4 "Localization" \
                       5 "Users" \
-                      6 "Install Extras"
+                      6 "Install Extras" \
                       7 "Reboot")
 }
 
