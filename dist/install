@@ -19,18 +19,21 @@ autoPartition () {
 
 installCoreSystem () {
     getvar "system-partition"
-    mount $value /mnt
+    systempt=$value
+
+    getvar "boot-partition"
+    bootpt=$value
+
+    mount $systempt /mnt
     pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
 
-    mkdir /mnt/usr/local/installer
-    curl -L $DISTRO_DL > /mnt/usr/local/installer/install
-    chmod +x /mnt/usr/local/installer/install.sh
-    cp ./install-vars /mnt/usr/local/installer/.
-
     arch-chroot /mnt <<EOF
+mkdir -p /usr/local/installer && cd /usr/local/installer
+curl -L $DISTRO_DL > ./install
+echo "system-partition=$systempt\nboot-partition=$bootpt"
+chmod +x ./install
 pacman -Sy --noconfirm dialog
-cd /usr/local/installer
 ./install continue
 EOF
 }
