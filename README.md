@@ -1,3 +1,11 @@
 ## arch-installer
 
-My setup scripts for Arch Linux.
+Graphical installation wizard for Arch Linux.
+
+## Usage
+
+Run: 
+```
+curl https://git.io/vXbTE | bash
+```
+
