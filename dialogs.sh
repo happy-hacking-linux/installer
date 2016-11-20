@@ -1,5 +1,3 @@
-source ./vars.sh
-
 welcomeMenu () {
 g    dialog --title "=^.^=" \
            --backtitle "Happy Hacking Linux" \

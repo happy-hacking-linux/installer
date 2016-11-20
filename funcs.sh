@@ -1,3 +1,5 @@
+DISTRO_DL="https://git.io/vXbTE"
+
 autoPartition () {
     parted /dev/sda --script mklabel msdos \
            mkpart primary ext4 0% 100% \
@@ -8,10 +10,19 @@ autoPartition () {
 installCoreSystem () {
     getvar "system-partition"
     mount $value /mnt
-    pacstrap /mnt base 2> /tmp/err || errorDialog "Installing core packages failed. Return to main menu and try installing this step again."
+    pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
-    arch-chroot /mnt
-    pacman --noconfirm -Sy dialog > /dev/null
+
+    mkdir /mnt/usr/local/installer
+    curl -L $DISTRO_DL > /mnt/usr/local/installer/install
+    chmod +x /mnt/usr/local/installer/install.sh
+    cp ./install-vars /mnt/usr/local/installer/.
+
+    arch-chroot /mnt <<EOF
+pacman -Sy --noconfirm dialog
+cd /usr/local/installer
+./install
+EOF
 }
 
 installGRUB () {

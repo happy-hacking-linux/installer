@@ -1,3 +1,5 @@
+command=$1
+
 mainMenuStep () {
     mainMenu
 
@@ -58,7 +60,7 @@ installVimrc () {
 }
 
 installSpacemacs () {
-    dialog --infobox "Installing spacemacs" 10 50; installZSH
+    dialog --infobox "Installing spacemacs" 10 50; installSpacemacs
     extrasMenuStep
 }
 
@@ -127,6 +129,7 @@ partitionStep () {
 
     if [ "$selected" = "1" ]; then
         autoPartition
+        mkfs.ext4 /dev/sda1 > /dev/null 2> /tmp/error || error "Failed to format the disk"
         setvar "boot-partition" "/dev/sda1"
         setvar "system-partition" "/dev/sda1"
     elif [ "$selected" = "2" ]; then
