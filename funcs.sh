@@ -21,7 +21,7 @@ installCoreSystem () {
     arch-chroot /mnt <<EOF
 pacman -Sy --noconfirm dialog
 cd /usr/local/installer
-./install
+./install continue
 EOF
 }
 

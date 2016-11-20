@@ -119,6 +119,9 @@ installExtraPackagesStep () {
 
 coreInstallStep () {
     dialog --infobox "Installing core system packages, please wait..." 10 50; installCoreSystem
+}
+
+afterCoreInstallStep () {
     switchToLTSStep
     installExtraPackagesStep
     installBootStep
@@ -159,3 +162,9 @@ startingStep () {
         mainMenuStep
     fi
 }
+
+if [ "$command" = "continue" ]; then
+    afterCoreInstallStep
+else
+    startingStep
+fi
