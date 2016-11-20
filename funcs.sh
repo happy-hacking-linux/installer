@@ -112,7 +112,7 @@ installVirtualBox () {
 }
 
 installExtraPackages () {
-    pacman --no-confirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
+    pacman --noconfirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
     pacman -Sy --noconfirm base-devel \
          net-tools \
          pkgfile \
