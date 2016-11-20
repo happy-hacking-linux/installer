@@ -1,5 +1,5 @@
 welcomeMenu () {
-g    dialog --title "=^.^=" \
+    dialog --title "=^.^=" \
            --backtitle "Happy Hacking Linux" \
            --defaultno \
            --no-label "Next Step" \

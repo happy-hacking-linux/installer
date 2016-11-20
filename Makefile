@@ -7,4 +7,4 @@ build:
 
 clean:
 	@-rm dist/install 2> /dev/null || true
-	@-rm -s install-vars* 2> /dev/null || true
+	@-rm install-vars* 2> /dev/null || true
