@@ -113,37 +113,37 @@ installVirtualBox () {
 
 installExtraPackages () {
     pacman --noconfirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
-    pacman -Sy --noconfirm base-devel \
-         net-tools \
-         pkgfile \
-         xf86-video-vesa \
-         xorg-server \
-         xorg-server-utils \
-         xorg-apps \
-         ttf-dejavu \
-         ttf-droid \
-         ttf-inconsolata \
-         ttf-symbola \
-         ttf-ancient-fonts \
-         ttf-bitstream-vera \
-         terminus-font \
-         curl \
-         wget \
-         git \
-         tmux \
-         zsh \
-         checkinstall \
-         firefox \
-         xmonad \
-         xmobar \
-         feh \
-         scrot \
-v         moc \
-         newsbeuter \
-         dmenu \
-         rxvt-unicode \
-         emacs \
-         vim \
-         htop \
-         go 2> /tmp/err || errorDialog "Failed to complete installing extra packages"
+    pacman -Sy \
+           --noconfirm \
+           base-devel \
+           net-tools \
+           pkgfile \
+           xf86-video-vesa \
+           xorg-server \
+           xorg-server-utils \
+           xorg-apps \
+           ttf-dejavu \
+           ttf-droid \
+           ttf-inconsolata \
+           ttf-symbola \
+           ttf-bitstream-vera \
+           terminus-font \
+           curl \
+           wget \
+           git \
+           tmux \
+           zsh \
+           firefox \
+           xmonad \
+           xmobar \
+           feh \
+           scrot \
+           moc \
+           newsbeuter \
+           dmenu \
+           rxvt-unicode \
+           emacs \
+           vim \
+           htop \
+           go 2> /tmp/err || errorDialog "Failed to complete installing extra packages"
 }
