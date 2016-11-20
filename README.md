@@ -1,6 +1,6 @@
-## arch-installer
+## installer
 
-Graphical installation wizard for Arch Linux.
+Graphical installation wizard for Happy Hacking Linux.
 
 ## Usage
 
