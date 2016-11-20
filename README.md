@@ -6,6 +6,6 @@ Graphical installation wizard for Arch Linux.
 
 Run: 
 ```
-curl https://git.io/vXbTE | bash
+curl -L https://git.io/vXbTE | bash
 ```
 
