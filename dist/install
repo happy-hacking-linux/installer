@@ -122,8 +122,8 @@ installVirtualBox () {
 }
 
 installExtraPackages () {
-    sudo pacman --no-confirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
-    sudo pacman -Sy --noconfirm base-devel \
+    pacman --no-confirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
+    pacman -Sy --noconfirm base-devel \
          net-tools \
          pkgfile \
          xf86-video-vesa \
