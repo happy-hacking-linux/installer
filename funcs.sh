@@ -1,7 +1,8 @@
 autoPartition () {
     parted /dev/sda --script mklabel msdos \
            mkpart primary ext4 0% 100% \
-           set 1 boot on > /dev/null 2> /tmp/err || errorDialog "Failed to create disk partitions"
+           set 1 boot on 2> /tmp/err || errorDialog "Failed to create disk partitions"
+    mkfs.ext4 /dev/sda1 > /dev/null 2> /tmp/error || error "Failed to format the root partition"
 }
 
 installCoreSystem () {
@@ -122,7 +123,7 @@ installExtraPackages () {
          xmobar \
          feh \
          scrot \
-         moc \
+v         moc \
          newsbeuter \
          dmenu \
          rxvt-unicode \

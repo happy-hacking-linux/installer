@@ -1,7 +1,7 @@
 source ./vars.sh
 
 welcomeMenu () {
-    dialog --title "=^.^=" \
+g    dialog --title "=^.^=" \
            --backtitle "Happy Hacking Linux" \
            --defaultno \
            --no-label "Next Step" \
@@ -17,7 +17,7 @@ mainMenu () {
                       --backtitle "Happy Hacking Linux" \
                       --ok-label "Select" \
                       --nocancel \
-                      --menu "Complete the following installation steps one by one." 16 55 7 \
+                      --menu "Complete the following installation steps one by one." 16 55 8 \
                       1 "Setup Disk Partitions" \
                       2 "Install Core Packages" \
                       3 "Install Boot (GRUB)" \
@@ -128,9 +128,12 @@ passwordDialog () {
 }
 
 errorDialog () {
-    dialog --title "Error: $1" \
+    echo "Message: $1\nOutput: \n" | cat - /tmp/err > /tmp/err.bak && mv /tmp/err.bak /tmp/err
+
+    dialog --title "Oops, there was an error" \
            --backtitle "Happy Hacking Linux" \
            --textbox /tmp/err 20 50
+
     rm /tmp/err
     mainMenuStep
 }
