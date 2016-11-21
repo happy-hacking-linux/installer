@@ -54,9 +54,9 @@ diskMenu () {
                       --cancel-label "Main Menu" \
                       --menu "Select A Disk" \
                       15 30 30 \
-                      "${ar[@]}")
+                      "${disksArray[@]}")
 
-    selected=$(lsblk -r | grep part | cut -d" " -f1 | sed -n "${selected}p")
+    selected=$(lsblk -r | grep disk | cut -d" " -f1 | sed -n "${selected}p")
     selected="/dev/${selected}"
 }
 
