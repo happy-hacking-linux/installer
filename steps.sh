@@ -90,27 +90,46 @@ rebootStep () {
 }
 
 usersStep () {
-  usernameDialog
-  setvar "username" $username
+  getvar "users-step"
+  if [ "$value" != "done" ]; then
+      usernameDialog
+      setvar "username" $username
 
-  passwordDialog
-  createUser $username $password
+      passwordDialog
+      createUser $username $password
+
+      setvar "users-step" "done"
+  fi
 
   mainMenuStep
 }
 
 localizationStep () {
-    localize
+    getvar "localization-step"
+    if [ "$value" != "done" ]; then
+        localize
+        setvar "localization-step" "done"
+    fi
+
     usersStep
 }
 
 installBootStep () {
-    dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
+    getvar "boot-install-step"
+    if [ "$value" != "done" ]; then
+        dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
+        setvar "boot-install-step" "done"
+    fi
+
     localizationStep
 }
 
 switchToLTSStep () {
-    dialog --infobox "Switching to Linux LTS Kernel as it's more stable." 10 50; installLTSKernel
+    getvar "lts-step"
+    if [ "$value" != "done" ]; then
+        dialog --infobox "Switching to Linux LTS Kernel as it's more stable." 10 50; installLTSKernel
+        setvar "lts-step" "done"
+    fi
 }
 
 installExtraPackagesStep () {
@@ -118,7 +137,13 @@ installExtraPackagesStep () {
 }
 
 coreInstallStep () {
-    dialog --infobox "Installing core system packages, please wait..." 10 50; installCoreSystem
+    getvar "core-install-step"
+    if [ "$value" != "done" ]; then
+        dialog --infobox "Installing core system packages, please wait..." 10 50; installCoreSystem
+        setvar "core-install-step" "done"
+    fi
+
+    afterCoreInstallStep
 }
 
 afterCoreInstallStep () {
@@ -150,6 +175,7 @@ partitionStep () {
         mainMenuStep
     fi
 
+    setvar "partition-step" "done"
     coreInstallStep
 }
 

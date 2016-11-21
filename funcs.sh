@@ -10,8 +10,8 @@ autoPartition () {
            set 1 boot on \
            mkpart primary ext4 512MiB 100% 2> /tmp/err || errorDialog "Failed to create disk partitions"
 
-    yes | mkfs.ext4 "${1}1" > /dev/null 2> /tmp/error || error "Failed to format the boot partition"
-    yes | mkfs.ext4 "${1}2" > /dev/null 2> /tmp/error || error "Failed to format the root partition"
+    yes | mkfs.ext4 "${1}1" > /dev/null 2> /tmp/err || error "Failed to format the boot partition"
+    yes | mkfs.ext4 "${1}2" > /dev/null 2> /tmp/err || error "Failed to format the root partition"
 
     mount "${1}2" /mnt
     mkdir /mnt/boot
@@ -34,7 +34,7 @@ installCoreSystem () {
     arch-chroot /mnt <<EOF
 mkdir -p /usr/local/installer && cd /usr/local/installer
 curl -L $DISTRO_DL > ./install
-echo "system-partition=$systempt\nboot-partition=$bootpt"
+echo "system-partition=$systempt\nboot-partition=$bootpt\ncore-install-step=done\npartition-step=done" > ./install-vars
 chmod +x ./install
 pacman -Sy --noconfirm dialog
 ./install continue
@@ -48,10 +48,10 @@ installGRUB () {
 }
 
 localize () {
-    tzselect 2> /tmp/error || errorDialog "tzselect is missing"
+    tzselect 2> /tmp/err || errorDialog "tzselect is missing"
     hwclock --systohc
     sed -i -e '/^#en_US/s/^#//' /etc/locale.gen # uncomment lines starting with #en_US
-    locale-gen 2> /tmp/error || errorDialog "locale-gen is missing"
+    locale-gen 2> /tmp/err || errorDialog "locale-gen is missing"
 
     # FIX ME: Allow user to choose language and keyboard
     echo "LANG=en_US.UTF-8" >> /etc/locale.conf

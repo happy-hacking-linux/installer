@@ -1,3 +1,5 @@
+CHECK=✔
+
 welcomeMenu () {
     dialog --title "=^.^=" \
            --backtitle "Happy Hacking Linux" \
@@ -10,17 +12,48 @@ welcomeMenu () {
 }
 
 mainMenu () {
+    icon1=""
+    icon2=""
+    icon3=""
+    icon4=""
+    icon5=""
+
+    getvar "partition-step"
+    if [ "$value" = "done" ]; then
+        icon1="${CHECK} "
+    fi
+
+    getvar "core-install-step"
+    if [ "$value" = "done" ]; then
+        icon2="${CHECK} "
+    fi
+
+    getvar "boot-install-step"
+    if [ "$value" = "done" ]; then
+        icon3="${CHECK} "
+    fi
+
+    getvar "localization-step"
+    if [ "$value" = "done" ]; then
+        icon4="${CHECK} "
+    fi
+
+    getvar "users-step"
+    if [ "$value" = "done" ]; then
+        icon5="${CHECK} "
+    fi
+
     selected=$(dialog --stdout \
                       --title "=^.^=" \
                       --backtitle "Happy Hacking Linux" \
                       --ok-label "Select" \
                       --nocancel \
                       --menu "Complete the following installation steps one by one." 16 55 8 \
-                      1 "Setup Disk Partitions" \
-                      2 "Install Core Packages" \
-                      3 "Install Boot (GRUB)" \
-                      4 "Localization" \
-                      5 "Users" \
+                      1 "${icon1}Setup Disk Partitions" \
+                      2 "${icon2}Install Core Packages" \
+                      3 "${icon3}Install Boot (GRUB)" \
+                      4 "${icon4}Localization" \
+                      5 "${icon5}Users" \
                       6 "Install Extras" \
                       7 "Reboot")
 }
@@ -146,6 +179,9 @@ passwordDialog () {
 }
 
 errorDialog () {
+    echo "$1\n\n" > ./install-errors.log
+    [[ -f ~/tmp/err ]] && cat /tmp/err >> ./install-errors.log
+
     echo "Message: $1\nOutput: \n" | cat - /tmp/err > /tmp/err.bak && mv /tmp/err.bak /tmp/err
 
     dialog --title "Oops, there was an error" \
