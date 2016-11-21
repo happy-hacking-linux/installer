@@ -44,7 +44,7 @@ installCoreSystem () {
     arch-chroot /mnt <<EOF
 mkdir -p /usr/local/installer && cd /usr/local/installer
 curl -L $DISTRO_DL > ./install
-echo "system-partition=$systempt\nboot-partition=$bootpt\ncore-install-step=done\npartition-step=done" > ./install-vars
+echo -e "system-partition=$systempt\nboot-partition=$bootpt\ncore-install-step=done\npartition-step=done" > ./install-vars
 chmod +x ./install
 pacman -Sy --noconfirm dialog
 ./install continue
