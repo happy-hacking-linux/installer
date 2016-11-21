@@ -41,7 +41,7 @@ extrasMenu () {
 }
 
 diskMenu () {
-    disks=$(lsblk -r | grep part | cut -d" " -f1,4 | nl)
+    disks=$(lsblk -r | grep disk | cut -d" " -f1,4 | nl)
     disksArray=()
     while read i name size; do
         disksArray+=($i "/dev/$name ($size)")
