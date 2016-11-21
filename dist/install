@@ -216,7 +216,7 @@ diskMenu () {
     disks=$(lsblk -r | grep part | cut -d" " -f1,4 | nl)
     disksArray=()
     while read i name size; do
-        disksArray+=($i "$name $size")
+        disksArray+=($i "/dev/$name ($size)")
     done <<< "$disks"
 
     selected=$(dialog --stdout \
@@ -225,6 +225,7 @@ diskMenu () {
                       --ok-label "Next" \
                       --cancel-label "Main Menu" \
                       --menu "Select A Disk" \
+                      15 30 30 \
                       "${ar[@]}")
 
     selected=$(lsblk -r | grep part | cut -d" " -f1 | sed -n "${selected}p")
