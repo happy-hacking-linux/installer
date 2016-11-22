@@ -1,4 +1,4 @@
-CHECK=✔
+CHECK="[OK]"
 
 welcomeMenu () {
     dialog --title "=^.^=" \
@@ -69,8 +69,7 @@ extrasMenu () {
                       2 "ZSH" \
                       3 "spacemacs: emacs distribution" \
                       4 "amix/vimrc: popular vim distributon" \
-                      5 "janus: another popular vim distro" \
-                      6 "VirtualBox Guest Additions")
+                      5 "VirtualBox Guest Additions")
 }
 
 diskMenu () {

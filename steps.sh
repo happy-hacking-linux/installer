@@ -34,11 +34,7 @@ extrasMenuStep () {
     elif [ "$selected" = "4" ]; then
         installVimrcStep
     elif [ "$selected" = "5" ]; then
-        installVimJanusStep
-    elif [ "$selected" = "6" ]; then
         installVirtualBoxStep
-    elif [ "$selected" = "7" ]; then
-        ltsStep
     else
         mainMenuStep
     fi
@@ -46,11 +42,6 @@ extrasMenuStep () {
 
 installVirtualBoxStep () {
     dialog --infobox "Installing VirtualBox Guest Additions" 10 50; installVirtualBox
-    extrasMenuStep
-}
-
-installVimJanusStep () {
-    dialog --infobox "Installing Janus Distro for Vim" 10 50; installVimJanus
     extrasMenuStep
 }
 
@@ -140,10 +131,9 @@ coreInstallStep () {
     getvar "core-install-step"
     if [ "$value" != "done" ]; then
         dialog --infobox "Installing core system packages, please wait..." 10 50; installCoreSystem
+        afterCoreInstallStep
         setvar "core-install-step" "done"
     fi
-
-    afterCoreInstallStep
 }
 
 afterCoreInstallStep () {

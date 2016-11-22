@@ -6,7 +6,7 @@ init () {
 
 autoPartition () {
     parted $1 --script mklabel msdos \
-           mkpart primary ext4 1MiB 512MiB \
+           mkpart primary ext4 3MiB 512MiB \
            set 1 boot on \
            mkpart primary ext4 512MiB 100% 2> /tmp/err || errorDialog "Failed to create disk partitions"
 
@@ -36,13 +36,15 @@ mkdir -p /usr/local/installer && cd /usr/local/installer
 curl -L $DISTRO_DL > ./install
 echo -e "system-partition=$systempt\nboot-partition=$bootpt\ncore-install-step=done\npartition-step=done" > ./install-vars
 chmod +x ./install
-pacman -Sy --noconfirm dialog
+pacman -S --noconfirm dialog
 ./install continue
 EOF
 }
 
 installGRUB () {
-    pacman -Sy --noconfirm grub 2> /tmp/err || errorDialog "Failed to install GRUB"
+    pacman -S --noconfirm g
+
+    rub 2> /tmp/err || errorDialog "Failed to install GRUB"
     getvar "boot-partition"
     grub-install --target=i386-pc --recheck $value 2> /tmp/err || errorDialog "Failed to install GRUB"
 }
@@ -126,7 +128,7 @@ installVirtualBox () {
 
 installExtraPackages () {
     pacman --noconfirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
-    pacman -Sy \
+    pacman -S \
            --noconfirm \
            base-devel \
            net-tools \
