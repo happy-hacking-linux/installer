@@ -16,7 +16,7 @@ init () {
 
 autoPartition () {
     parted $1 --script mklabel msdos \
-           mkpart primary ext4 1MiB 512MiB \
+           mkpart primary ext4 3MiB 512MiB \
            set 1 boot on \
            mkpart primary ext4 512MiB 100% 2> /tmp/err || errorDialog "Failed to create disk partitions"
 
@@ -46,13 +46,15 @@ mkdir -p /usr/local/installer && cd /usr/local/installer
 curl -L $DISTRO_DL > ./install
 echo -e "system-partition=$systempt\nboot-partition=$bootpt\ncore-install-step=done\npartition-step=done" > ./install-vars
 chmod +x ./install
-pacman -Sy --noconfirm dialog
+pacman -S --noconfirm dialog
 ./install continue
 EOF
 }
 
 installGRUB () {
-    pacman -Sy --noconfirm grub 2> /tmp/err || errorDialog "Failed to install GRUB"
+    pacman -S --noconfirm g
+
+    rub 2> /tmp/err || errorDialog "Failed to install GRUB"
     getvar "boot-partition"
     grub-install --target=i386-pc --recheck $value 2> /tmp/err || errorDialog "Failed to install GRUB"
 }
@@ -136,7 +138,7 @@ installVirtualBox () {
 
 installExtraPackages () {
     pacman --noconfirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
-    pacman -Sy \
+    pacman -S \
            --noconfirm \
            base-devel \
            net-tools \
@@ -170,7 +172,7 @@ installExtraPackages () {
            htop \
            go 2> /tmp/err || errorDialog "Failed to complete installing extra packages"
 }
-CHECK=✔
+CHECK="[OK]"
 
 welcomeMenu () {
     dialog --title "=^.^=" \
@@ -241,8 +243,7 @@ extrasMenu () {
                       2 "ZSH" \
                       3 "spacemacs: emacs distribution" \
                       4 "amix/vimrc: popular vim distributon" \
-                      5 "janus: another popular vim distro" \
-                      6 "VirtualBox Guest Additions")
+                      5 "VirtualBox Guest Additions")
 }
 
 diskMenu () {
@@ -410,11 +411,7 @@ extrasMenuStep () {
     elif [ "$selected" = "4" ]; then
         installVimrcStep
     elif [ "$selected" = "5" ]; then
-        installVimJanusStep
-    elif [ "$selected" = "6" ]; then
         installVirtualBoxStep
-    elif [ "$selected" = "7" ]; then
-        ltsStep
     else
         mainMenuStep
     fi
@@ -422,11 +419,6 @@ extrasMenuStep () {
 
 installVirtualBoxStep () {
     dialog --infobox "Installing VirtualBox Guest Additions" 10 50; installVirtualBox
-    extrasMenuStep
-}
-
-installVimJanusStep () {
-    dialog --infobox "Installing Janus Distro for Vim" 10 50; installVimJanus
     extrasMenuStep
 }
 
@@ -516,10 +508,9 @@ coreInstallStep () {
     getvar "core-install-step"
     if [ "$value" != "done" ]; then
         dialog --infobox "Installing core system packages, please wait..." 10 50; installCoreSystem
+        afterCoreInstallStep
         setvar "core-install-step" "done"
     fi
-
-    afterCoreInstallStep
 }
 
 afterCoreInstallStep () {
