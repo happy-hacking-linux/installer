@@ -6,18 +6,13 @@ init () {
 
 autoPartition () {
     parted $1 --script mklabel msdos \
-           mkpart primary ext4 3MiB 512MiB \
-           set 1 boot on \
-           mkpart primary ext4 512MiB 100% 2> /tmp/err || errorDialog "Failed to create disk partitions"
+           mkpart primary ext4 3MiB 100% \
+           set 1 boot on 2> /tmp/err || errorDialog "Failed to create disk partitions"
 
     yes | mkfs.ext4 "${1}1" > /dev/null 2> /tmp/err || error "Failed to format the boot partition"
     yes | mkfs.ext4 "${1}2" > /dev/null 2> /tmp/err || error "Failed to format the root partition"
 
-    mount "${1}2" /mnt
-    mkdir /mnt/boot
-    mount "${1}1" /mnt/boot
-
-    setvar "boot-partition" "${1}1"
+    mount "${1}1" /mnt
     setvar "system-partition" "${1}2"
 }
 
@@ -25,8 +20,8 @@ installCoreSystem () {
     getvar "system-partition"
     systempt=$value
 
-    getvar "boot-partition"
-    bootpt=$value
+    getvar "disk"
+    disk=$value
 
     pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
@@ -34,18 +29,16 @@ installCoreSystem () {
     arch-chroot /mnt <<EOF
 mkdir -p /usr/local/installer && cd /usr/local/installer
 curl -L $DISTRO_DL > ./install
-echo -e "system-partition=$systempt\nboot-partition=$bootpt\ncore-install-step=done\npartition-step=done" > ./install-vars
+echo -e "system-partition=$systempt\ndisk=$disk\ncore-install-step=done\npartition-step=done" > ./install-vars
 chmod +x ./install
 pacman -S --noconfirm dialog
 ./install continue
-EOF
+ EOF
 }
 
 installGRUB () {
-    pacman -S --noconfirm g
-
-    rub 2> /tmp/err || errorDialog "Failed to install GRUB"
-    getvar "boot-partition"
+    pacman -S --noconfirm grub 2> /tmp/err || errorDialog "Failed to install GRUB"
+    getvar "disk"
     grub-install --target=i386-pc --recheck $value 2> /tmp/err || errorDialog "Failed to install GRUB"
 }
 

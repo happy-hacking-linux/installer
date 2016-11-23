@@ -88,6 +88,7 @@ diskMenu () {
                       15 30 30 \
                       "${disksArray[@]}")
 
+    setvar "disk" "$selected"
     selected=$(lsblk -r | grep disk | cut -d" " -f1 | sed -n "${selected}p")
     selected="/dev/${selected}"
 }
@@ -113,20 +114,16 @@ partitionSelectionForm () {
                     --nocancel \
 	                  --form "" \
                     7 50 0 \
-	                  "/boot" 1 1	"${1}1" 	1 10 45 0 \
-	                  "/"    2 1	"${1}1"  	2 10 45 0)
+	                  "Root: "    2 1	"${1}1"  	2 10 45 0)
 
-    bootpt=$(echo "$values" | head -n1)
     systempt=$(echo "$values" | tail -n1)
 
-    if [[ (-z "${bootpt// }") || (-z "${systempt// }") ]]; then
-        echo "bad input $bootpt and $systempt"
-        dialog --title "Select Partitions" \
+    if [[ -z "${systempt// }" ]]; then
+        dialog --title "Select System Partition" \
                --backtitle "Happy Hacking Linux" \
-               --msgbox "You need to fill both fields" 6 50
-        partitionForm
+               --msgbox "Sorry, you have to choose the partition you'd like to install the system." 6 50
+        partitionSelectionForm
     else
-        setvar "boot-partition" $bootpt
         setvar "system-partition" $systempt
     fi
 }
