@@ -70,13 +70,7 @@ linkDotFiles () {
     username=$value
 
     dotFilesBase=$(basename "$dotFilesRepo")
-
-    (
-    runuser -u $username -c <<EOF
-git clone $dotFilesRepo ~/.
-ln -s ~/${dotFilesBase}/.* ~/
-EOF
-    ) > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
+    runuser -u $username -c "git clone $dotFilesRepo ~/. && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
 }
 
 installLTSKernel () {

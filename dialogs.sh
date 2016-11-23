@@ -175,7 +175,7 @@ passwordDialog () {
 
 errorDialog () {
     echo "$1\n\n" > ./install-errors.log
-    [[ -f ~/tmp/err ]] && cat /tmp/err >> ./install-errors.log
+    [[ -f /tmp/err ]] && cat /tmp/err >> ./install-errors.log
 
     echo "Message: $1\nOutput: \n" | cat - /tmp/err > /tmp/err.bak && mv /tmp/err.bak /tmp/err
 
