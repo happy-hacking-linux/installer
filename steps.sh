@@ -58,7 +58,7 @@ installOhMyZSHStep () {
 }
 
 installNodeStep () {
-    dialog --infobox "Installing ZSH" 10 50; installNode
+    dialog --infobox "Installing NodeJS" 10 50; installNode
 }
 
 dotFilesStep () {
@@ -115,8 +115,6 @@ installBootStep () {
         dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
         setvar "boot-install-step" "done"
     fi
-
-    localizationStep
 }
 
 switchToLTSStep () {
@@ -141,9 +139,10 @@ coreInstallStep () {
 }
 
 afterCoreInstallStep () {
-    switchToLTSStep
     installExtraPackagesStep
     installBootStep
+    switchToLTSStep
+    localizationStep
 }
 
 partitionStep () {

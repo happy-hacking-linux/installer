@@ -87,8 +87,8 @@ installLTSKernel () {
     pacman -S --noconfirm linux-lts linux-lts-headers 2> /tmp/err || errorDialog "Can not install Linux LTS Kernel"
     sed -i '/GRUB_DEFAULT=0/c\GRUB_DEFAULT=saved' /etc/default/grub
     sed -i '/GRUB_GFXMODE=auto/c\GRUB_GFXMODE=1024x768x32' /etc/default/grub
-    sed -i -e '/^#GRUB_COLOR_NORMAL/s/^#//' /etc/locale.gen
-    sed -i -e '/^#GRUB_COLOR_HIGHLIGHT/s/^#//' /etc/locale.gen
+    sed -i -e '/^#GRUB_COLOR_NORMAL/s/^#//' /etc/default/grub
+    sed -i -e '/^#GRUB_COLOR_HIGHLIGHT/s/^#//' /etc/default/grub
     echo "GRUB_SAVEDEFAULT=true" >> /etc/default/grub
     echo "GRUB_DISABLE_SUBMENU=y" >> /etc/default/grub
 }
@@ -170,7 +170,7 @@ welcomeMenu () {
            --defaultno \
            --no-label "Next Step" \
            --yes-label "Main Menu" \
-           --yesno "Oh, hai. This is the installation wizard of Happy Hacking Linux. If you already started the installation, you can jump to the main menu and run a specific installation step. Otherwise, just hit the next button. \n\nIf you need help or wanna report an issue, go to github.com/azer/happy-hacking-linux" 13 55
+           --yesno "Oh, hai. This is the installation wizard of Happy Hacking Linux. If you already started the installation, you can jump to the main menu and run a specific installation step. Otherwise, just hit the next button. \n\nIf you need help or wanna report an issue, go to github.com/happy-hacking-linux" 13 55
 
     selected=$?
 }
@@ -421,7 +421,7 @@ installOhMyZSHStep () {
 }
 
 installNodeStep () {
-    dialog --infobox "Installing ZSH" 10 50; installNode
+    dialog --infobox "Installing NodeJS" 10 50; installNode
 }
 
 dotFilesStep () {
@@ -478,8 +478,6 @@ installBootStep () {
         dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
         setvar "boot-install-step" "done"
     fi
-
-    localizationStep
 }
 
 switchToLTSStep () {
@@ -504,9 +502,10 @@ coreInstallStep () {
 }
 
 afterCoreInstallStep () {
-    switchToLTSStep
     installExtraPackagesStep
     installBootStep
+    switchToLTSStep
+    localizationStep
 }
 
 partitionStep () {

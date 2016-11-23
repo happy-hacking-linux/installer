@@ -6,7 +6,7 @@ welcomeMenu () {
            --defaultno \
            --no-label "Next Step" \
            --yes-label "Main Menu" \
-           --yesno "Oh, hai. This is the installation wizard of Happy Hacking Linux. If you already started the installation, you can jump to the main menu and run a specific installation step. Otherwise, just hit the next button. \n\nIf you need help or wanna report an issue, go to github.com/azer/happy-hacking-linux" 13 55
+           --yesno "Oh, hai. This is the installation wizard of Happy Hacking Linux. If you already started the installation, you can jump to the main menu and run a specific installation step. Otherwise, just hit the next button. \n\nIf you need help or wanna report an issue, go to github.com/happy-hacking-linux" 13 55
 
     selected=$?
 }

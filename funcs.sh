@@ -77,8 +77,8 @@ installLTSKernel () {
     pacman -S --noconfirm linux-lts linux-lts-headers 2> /tmp/err || errorDialog "Can not install Linux LTS Kernel"
     sed -i '/GRUB_DEFAULT=0/c\GRUB_DEFAULT=saved' /etc/default/grub
     sed -i '/GRUB_GFXMODE=auto/c\GRUB_GFXMODE=1024x768x32' /etc/default/grub
-    sed -i -e '/^#GRUB_COLOR_NORMAL/s/^#//' /etc/locale.gen
-    sed -i -e '/^#GRUB_COLOR_HIGHLIGHT/s/^#//' /etc/locale.gen
+    sed -i -e '/^#GRUB_COLOR_NORMAL/s/^#//' /etc/default/grub
+    sed -i -e '/^#GRUB_COLOR_HIGHLIGHT/s/^#//' /etc/default/grub
     echo "GRUB_SAVEDEFAULT=true" >> /etc/default/grub
     echo "GRUB_DISABLE_SUBMENU=y" >> /etc/default/grub
 }
