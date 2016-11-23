@@ -43,7 +43,7 @@ echo -e "system-partition=$systempt\ndisk=$disk\ncore-install-step=done\npartiti
 chmod +x ./install
 pacman -S --noconfirm dialog
 ./install continue
- EOF
+EOF
 }
 
 installGRUB () {
