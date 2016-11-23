@@ -80,7 +80,7 @@ linkDotFiles () {
     username=$value
 
     dotFilesBase=$(basename "$dotFilesRepo")
-    runuser -u $username -c "git clone $dotFilesRepo ~/. && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
+    runuser -l $username -c "git clone $dotFilesRepo ~/. && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
 }
 
 installLTSKernel () {
@@ -94,7 +94,7 @@ installLTSKernel () {
 }
 
 installNode () {
-	  runuser -u azer -c <<EOF
+	  runuser -l azer -c <<EOF
 curl https://raw.github.com/creationix/nvm/master/install.sh | bash
 source ~/.nvm/nvm.sh
 nvm install 7.1.0
@@ -104,7 +104,7 @@ EOF
 }
 
 installOhMyZSH () {
-    runuser -u azer -c '$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
+    runuser -l azer -c '$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
 }
 
 installSpacemacs () {
