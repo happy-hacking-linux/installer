@@ -195,5 +195,5 @@ dotFilesDialog () {
                           --backtitle "Happy Hacking Linux" \
                           --cancel-label "Skip" \
                           --ok-label "Clone & Link All" \
-                          --inputbox "Where is your dotfiles located?" 8 50 "git@github.com:"$username"/dotfiles.git")
+                          --inputbox "Where is your dotfiles located?" 8 50 "https://github.com/$username/dotfiles.git")
 }
