@@ -71,7 +71,7 @@ linkDotFiles () {
 
     dotFilesBase=$(basename "$dotFilesRepo")
 
-    runuser -u -azer -c <<EOF
+    runuser -u $username -c <<EOF
 git clone $dotFilesRepo ~/.
 ln -s ~/${dotFilesBase}/.* ~/
 EOF
