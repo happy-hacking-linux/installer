@@ -71,14 +71,16 @@ linkDotFiles () {
 
     dotFilesBase=$(basename "$dotFilesRepo")
 
+    (
     runuser -u $username -c <<EOF
 git clone $dotFilesRepo ~/.
 ln -s ~/${dotFilesBase}/.* ~/
 EOF
+    ) > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
 }
 
 installLTSKernel () {
-    pacman -S --noconfirm linux-lts linux-lts-headers 2> /tmp/err || error "Can not install Linux LTS Kernel"
+    pacman -S --noconfirm linux-lts linux-lts-headers 2> /tmp/err || errorDialog "Can not install Linux LTS Kernel"
     sed -i '/GRUB_DEFAULT=0/c\GRUB_DEFAULT=saved' /etc/default/grub
     sed -i '/GRUB_GFXMODE=auto/c\GRUB_GFXMODE=1024x768x32' /etc/default/grub
     sed -i -e '/^#GRUB_COLOR_NORMAL/s/^#//' /etc/locale.gen
