@@ -30,7 +30,7 @@ extrasMenuStep () {
     elif [ "$selected" = "2" ]; then
         installSpacemacsStep
     elif [ "$selected" = "3" ]; then
-        installVimrcStepStep
+        installVimrcStep
     elif [ "$selected" = "4" ]; then
         installVirtualBoxStep
     else
