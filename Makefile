@@ -2,7 +2,7 @@ all: clean build
 
 
 build:
-	@cat vars.sh funcs.sh dialogs.sh steps.sh > dist/install
+	@cat vars.sh timezone-selector.sh funcs.sh dialogs.sh steps.sh > dist/install
 	@chmod +x ./dist/install
 
 clean:

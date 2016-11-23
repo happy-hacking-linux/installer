@@ -43,7 +43,10 @@ installGRUB () {
 }
 
 localize () {
-    tzselect 2> /tmp/err || errorDialog "tzselect is missing"
+    yes | pip install tzupdate > /dev/null 2> /dev/null # ignore if it fails, let user choose tz
+
+    tzSelectionMenu "Happy Hacking Linux"
+
     hwclock --systohc
     sed -i -e '/^#en_US/s/^#//' /etc/locale.gen # uncomment lines starting with #en_US
     locale-gen 2> /tmp/err || errorDialog "locale-gen is missing"
@@ -150,5 +153,7 @@ installExtraPackages () {
            emacs \
            vim \
            htop \
+           python \
+           python-pip \
            go 2> /tmp/err || errorDialog "Failed to complete installing extra packages"
 }
