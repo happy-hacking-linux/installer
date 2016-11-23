@@ -30,7 +30,7 @@ extrasMenuStep () {
     elif [ "$selected" = "2" ]; then
         installSpacemacsStep
     elif [ "$selected" = "3" ]; then
-        installVimrcStep
+        installVimrcStepStep
     elif [ "$selected" = "4" ]; then
         installVirtualBoxStep
     else
@@ -43,12 +43,12 @@ installVirtualBoxStep () {
     extrasMenuStep
 }
 
-installVimrc () {
+installVimrcStep () {
     dialog --infobox "Installing amix/vimrc" 10 50; installVimrc
     extrasMenuStep
 }
 
-installSpacemacs () {
+installSpacemacsStep () {
     dialog --infobox "Installing spacemacs" 10 50; installSpacemacs
     extrasMenuStep
 }
