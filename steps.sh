@@ -28,12 +28,10 @@ extrasMenuStep () {
     if [ "$selected" = "1" ]; then
         dotFilesStep
     elif [ "$selected" = "2" ]; then
-        installZSHStep
-    elif [ "$selected" = "3" ]; then
         installSpacemacsStep
-    elif [ "$selected" = "4" ]; then
+    elif [ "$selected" = "3" ]; then
         installVimrcStep
-    elif [ "$selected" = "5" ]; then
+    elif [ "$selected" = "4" ]; then
         installVirtualBoxStep
     else
         mainMenuStep
@@ -55,9 +53,12 @@ installSpacemacs () {
     extrasMenuStep
 }
 
-installZSHStep () {
+installOhMyZSHStep () {
     dialog --infobox "Installing ZSH" 10 50; installZSH
-    extrasMenuStep
+}
+
+installNodeStep () {
+    dialog --infobox "Installing ZSH" 10 50; installNode
 }
 
 dotFilesStep () {
@@ -66,7 +67,7 @@ dotFilesStep () {
     if [[ -n "${dotFilesRepo// }" ]]; then
         setvar "dot-files-repo" $dotFilesRepo
 
-        dialog --infobox "Linking dotfiles" 10 50; linkDotFiles
+        dialog --infobox "Linking your dotfiles in ~/" 10 50; linkDotFiles
 
         if [ -f /home/$username/$dotFilesBase/happy-hacking-post-install.sh ]; then
             dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/happy-hacking-post-install.sh
@@ -88,6 +89,9 @@ usersStep () {
 
       passwordDialog
       createUser $username $password
+
+      installOhMyZSHStep
+      installNodeStep
 
       setvar "users-step" "done"
   fi

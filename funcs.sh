@@ -69,11 +69,12 @@ linkDotFiles () {
     getvar "username"
     username=$value
 
-    su - $username
-    git clone $dotFilesRepo ~/.
     dotFilesBase=$(basename "$dotFilesRepo")
-    ln -s ~/$dotFilesBase/.* ~/
-    exit
+
+    runuser -u -azer -c <<EOF
+git clone $dotFilesRepo ~/.
+ln -s ~/${dotFilesBase}/.* ~/
+EOF
 }
 
 installLTSKernel () {
@@ -87,17 +88,17 @@ installLTSKernel () {
 }
 
 installNode () {
-    curl https://raw.github.com/creationix/nvm/master/install.sh | bash
-	  source ~/.nvm/nvm.sh
-    nvm install 7.1.0
-	  nvm use 7.1.0
-	  nvm alias default 0.10
+	  runuser -u azer -c <<EOF
+curl https://raw.github.com/creationix/nvm/master/install.sh | bash
+source ~/.nvm/nvm.sh
+nvm install 7.1.0
+nvm use 7.1.0
+nvm alias default 0.10
+EOF
 }
 
 installOhMyZSH () {
-	  curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
-	  echo "source ~/dotfiles/.zshrc \nsource ~/dotfiles/.nvm \nsource ~/localbin/bashmarks/bashmarks.sh\nsource ~/.nvm/nvm.sh" > ~/.zshrc
-	  chsh -s $(which zsh)
+    runuser -u azer -c '$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
 }
 
 installSpacemacs () {

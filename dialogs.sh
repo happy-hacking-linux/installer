@@ -66,10 +66,9 @@ extrasMenu () {
                       --cancel-label "Main Menu" \
                       --menu "You can optionally setup some extra stuff, or return to main menu and reboot." 16 55 7 \
                       1 "dotfiles" \
-                      2 "ZSH" \
-                      3 "spacemacs: emacs distribution" \
-                      4 "amix/vimrc: popular vim distributon" \
-                      5 "VirtualBox Guest Additions")
+                      2 "spacemacs: emacs distribution" \
+                      3 "amix/vimrc: popular vim distributon" \
+                      4 "VirtualBox Guest Additions")
 }
 
 diskMenu () {
@@ -88,9 +87,9 @@ diskMenu () {
                       15 30 30 \
                       "${disksArray[@]}")
 
-    setvar "disk" "$selected"
     selected=$(lsblk -r | grep disk | cut -d" " -f1 | sed -n "${selected}p")
     selected="/dev/${selected}"
+    setvar "disk" "$selected"
 }
 
 partitionMenu () {
