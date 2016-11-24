@@ -3,6 +3,12 @@ command=$1
 mainMenuStep () {
     mainMenu
 
+    if [ "$button" = "1" ]; then
+        setvar "starting-step" ""
+        startingStep
+        return
+    fi
+
     if [ "$selected" = "1" ]; then
         partitionStep
     elif [ "$selected" = "2" ]; then
@@ -15,8 +21,6 @@ mainMenuStep () {
         localizeStep
     elif [ "$selected" = "6" ]; then
         rebootStep
-    else
-        startingStep
     fi
 }
 
@@ -85,19 +89,22 @@ rebootStep () {
 
 usersStep () {
   getvar "users-step"
-  if [ "$value" != "done" ]; then
-      getvar "username"
-      username=$value
 
-      getvar "name"
-      name=$value
-
-      passwordDialog
-      createUser $username $password $name
-
-      setvar "users-step" "done"
+  if [ "$value" == "done" ]; then
+      installPackagesStep
+      return
   fi
 
+  getvar "username"
+  username=$value
+
+  getvar "name"
+  name=$value
+
+  passwordDialog
+  createUser $username $password $name
+
+  setvar "users-step" "done"
   installPackagesStep
 }
 
@@ -123,6 +130,12 @@ coreInstallStep () {
 
 partitionStep () {
     diskMenu
+
+    if [ "$button" = "1" ]; then
+        mainMenuStep
+        return
+    fi
+
     disk=$selected
 
     partitionMenu $disk
@@ -140,8 +153,10 @@ partitionStep () {
         partitionSelectionForm $disk
     elif [ "$selected" = "5" ]; then
         mainMenuStep
+        return
     else
         mainMenuStep
+        return
     fi
 
     setvar "partition-step" "done"

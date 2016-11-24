@@ -59,7 +59,7 @@ localize () {
 }
 
 createUser () {
-    useradd -m -s /usr/bin/zsh -c $3 $1
+    useradd -m -s /usr/bin/zsh $1
     echo "$1:$2" | chpasswd
 
     echo "$1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers

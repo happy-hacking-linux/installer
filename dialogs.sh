@@ -70,6 +70,8 @@ mainMenu () {
                       4 "${icon4}Install Packages" \
                       5 "${icon5}Localize" \
                       6 "Reboot")
+
+    button=$?
 }
 
 diskMenu () {
@@ -87,6 +89,8 @@ diskMenu () {
                       --menu "Select A Disk" \
                       15 30 30 \
                       "${disksArray[@]}")
+
+    button=$?
 
     selected=$(lsblk -r | grep disk | cut -d" " -f1 | sed -n "${selected}p")
     selected="/dev/${selected}"

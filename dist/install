@@ -148,7 +148,7 @@ localize () {
 }
 
 createUser () {
-    useradd -m -s /usr/bin/zsh -c $3 $1
+    useradd -m -s /usr/bin/zsh $1
     echo "$1:$2" | chpasswd
 
     echo "$1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -364,6 +364,8 @@ mainMenu () {
                       4 "${icon4}Install Packages" \
                       5 "${icon5}Localize" \
                       6 "Reboot")
+
+    button=$?
 }
 
 diskMenu () {
@@ -381,6 +383,8 @@ diskMenu () {
                       --menu "Select A Disk" \
                       15 30 30 \
                       "${disksArray[@]}")
+
+    button=$?
 
     selected=$(lsblk -r | grep disk | cut -d" " -f1 | sed -n "${selected}p")
     selected="/dev/${selected}"
@@ -496,6 +500,12 @@ command=$1
 mainMenuStep () {
     mainMenu
 
+    if [ "$button" = "1" ]; then
+        setvar "starting-step" ""
+        startingStep
+        return
+    fi
+
     if [ "$selected" = "1" ]; then
         partitionStep
     elif [ "$selected" = "2" ]; then
@@ -508,8 +518,6 @@ mainMenuStep () {
         localizeStep
     elif [ "$selected" = "6" ]; then
         rebootStep
-    else
-        startingStep
     fi
 }
 
@@ -578,19 +586,22 @@ rebootStep () {
 
 usersStep () {
   getvar "users-step"
-  if [ "$value" != "done" ]; then
-      getvar "username"
-      username=$value
 
-      getvar "name"
-      name=$value
-
-      passwordDialog
-      createUser $username $password $name
-
-      setvar "users-step" "done"
+  if [ "$value" == "done" ]; then
+      installPackagesStep
+      return
   fi
 
+  getvar "username"
+  username=$value
+
+  getvar "name"
+  name=$value
+
+  passwordDialog
+  createUser $username $password $name
+
+  setvar "users-step" "done"
   installPackagesStep
 }
 
@@ -616,6 +627,12 @@ coreInstallStep () {
 
 partitionStep () {
     diskMenu
+
+    if [ "$button" = "1" ]; then
+        mainMenuStep
+        return
+    fi
+
     disk=$selected
 
     partitionMenu $disk
@@ -633,8 +650,10 @@ partitionStep () {
         partitionSelectionForm $disk
     elif [ "$selected" = "5" ]; then
         mainMenuStep
+        return
     else
         mainMenuStep
+        return
     fi
 
     setvar "partition-step" "done"
