@@ -147,11 +147,7 @@ startingStep () {
     setvar "username" $username
     setvar "dotFilesRepo" $dotFilesRepo
 
-    if [ "$selected" = "1" ]; then
-        partitionStep
-    else
-        mainMenuStep
-    fi
+    partitionStep
 }
 
 if [ "$command" = "continue" ]; then
