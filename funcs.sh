@@ -37,9 +37,9 @@ EOF
 }
 
 installGRUB () {
-    pacman -S --noconfirm grub 2> /tmp/err || errorDialog "Failed to install GRUB"
+    pacman -S --noconfirm grub > /dev/null 2> /tmp/err || errorDialog "Failed to install GRUB. Are you connected to internet?"
     getvar "disk"
-    grub-install --target=i386-pc --recheck $value 2> /tmp/err || errorDialog "Failed to install GRUB"
+    grub-install --target=i386-pc --recheck $value > /dev/null 2> /tmp/err || errorDialog "Failed to run grub-install"
 }
 
 localize () {
@@ -57,7 +57,7 @@ localize () {
 }
 
 createUser () {
-    useradd -m -s /usr/bin/zsh $1
+    useradd -m -s /usr/bin/zsh -c $3 $1
     echo "$1:$2" | chpasswd
 
     echo "$1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -72,18 +72,8 @@ linkDotFiles () {
     getvar "username"
     username=$value
 
-    dotFilesBase=$(basename "$dotFilesRepo")
+    dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
     runuser -l $username -c "git clone $dotFilesRepo ~/${dotFilesBase} && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
-}
-
-installLTSKernel () {
-    pacman -S --noconfirm linux-lts linux-lts-headers 2> /tmp/err || errorDialog "Can not install Linux LTS Kernel"
-    sed -i '/GRUB_DEFAULT=0/c\GRUB_DEFAULT=saved' /etc/default/grub
-    sed -i '/GRUB_GFXMODE=auto/c\GRUB_GFXMODE=1024x768x32' /etc/default/grub
-    sed -i -e '/^#GRUB_COLOR_NORMAL/s/^#//' /etc/default/grub
-    sed -i -e '/^#GRUB_COLOR_HIGHLIGHT/s/^#//' /etc/default/grub
-    echo "GRUB_SAVEDEFAULT=true" >> /etc/default/grub
-    echo "GRUB_DISABLE_SUBMENU=y" >> /etc/default/grub
 }
 
 installNode () {
@@ -97,63 +87,94 @@ EOF
 }
 
 installOhMyZSH () {
-    runuser -l azer -c '$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
-}
-
-installSpacemacs () {
-    git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
-}
-
-installVimrc () {
-    git clone git://github.com/amix/vimrc.git ~/.vim_runtime
-    sh ~/.vim_runtime/install_awesome_vimrc.sh
-}
-
-installVimJanus () {
-    curl -L https://bit.ly/janus-bootstrap | bash
+    runuser -l azer -c 'sh -c $(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
 }
 
 installVirtualBox () {
-    pacman --noconfirm -Sy virtualbox-guest-utils virtualbox-guest-modules virtualbox-guest-modules-lts virtualbox-guest-dkms
-    echo "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
-    systemctl enable vboxservice.service
+    if lspci | grep -i virtualbox -q; then
+        pacman --noconfirm -S virtualbox-guest-utils virtualbox-guest-modules-arch virtualbox-guest-dkms
+        echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
+        systemctl enable vboxservice.service
+    fi
 }
 
-installExtraPackages () {
-    pacman --noconfirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
-    pacman -S \
-           --noconfirm \
+upgradeSystem () {
+    pacman --noconfirm -Syu > /dev/null 2> /tmp/err || errorDialog "Can not upgrade the system. Are you connected to internet?"
+    pacman -S --noconfirm \
            base-devel \
            net-tools \
            pkgfile \
            xf86-video-vesa \
-           xorg-server \
-           xorg-server-utils \
-           xorg-apps \
-           ttf-dejavu \
-           ttf-droid \
-           ttf-inconsolata \
-           ttf-symbola \
-           ttf-bitstream-vera \
-           terminus-font \
            curl \
            wget \
            git \
-           tmux \
-           zsh \
-           firefox \
+           grep  > /dev/null 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
+}
+
+installYaourt () {
+    git clone https://aur.archlinux.org/package-query.git /tmp/package-query > /dev/null 2> /tmp/err || errorDialog "Can not install AUR"
+    cd /tmp/package-query
+    yes | makepkg -si > /dev/null 2> /tmp/err || errorDialog "Can not build AUR"
+
+    git clone https://aur.archlinux.org/yaourt.git > /dev/null 2> /tmp/err || errorDialog "Can not install Yaourt"
+    cd /tmp/yaourt
+    yes | makepkg -si 2> /tmp/err || errorDialog "Can not build Yaourt"
+}
+
+installDesktop () {
+    pacman -S --noconfirm xorg \
+           xorg-init \
            xmonad \
+           xmonad-contrib \
            xmobar \
            feh \
+           unclutter \
+           firefox \
            scrot \
-           moc \
-           newsbeuter \
-           dmenu \
-           rxvt-unicode \
+           dmenu > /dev/null 2> /tmp/err || errorDialog "Failed to install desktop packages. Are you connected to internet?"
+}
+
+installDevTools () {
+    pacman -S --noconfirm go \
            emacs \
            vim \
-           htop \
+           node \
            python \
            python-pip \
-           go 2> /tmp/err || errorDialog "Failed to complete installing extra packages"
+           mariadb > /dev/null 2> /tmp/err || errorDialog "Failed to install programming packages. Are you connected to internet?"
+
+    installNode
+}
+
+installCLITools () {
+    pacman -S --noconfirm \
+           tmux \
+           acpi \
+           newsbeuter \
+           htop > /dev/null 2> /tmp/err || errorDialog "Failed to install command-line utilities. Are you connected to internet?"
+}
+
+installMedia () {
+    pacman -S alsa-utils mplayer moc > /dev/null 2> /tmp/err || errorDialog "Failed to install media"
+}
+
+installFonts () {
+    pacman -S ttf-dejavu \
+        ttf-droid \
+        ttf-inconsolata \
+        ttf-symbola \
+        ttf-bitstream-vera \
+        terminus-font \
+        ttf-fira-mono \
+        ttf-fira-sans \
+        adobe-source-code-pro-fonts > /dev/null 2> /tmp/err || errorDialog "Failed to install fonts"
+
+    yaourt -S --noconfirm \
+           ttf-mac-fonts \
+           system-san-francisco-font-git \
+           ttf-monaco > /dev/null 2> /tmp/err || errorDialog "Failed to install Mac fonts. Are you connected to internet?"
+}
+
+installURXVT () {
+    yaourt --noconfirm -S rxvt-unicode-256xresources > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
 }

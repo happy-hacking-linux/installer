@@ -1,14 +1,29 @@
 CHECK="[OK]"
 
-welcomeMenu () {
-    dialog --title "=^.^=" \
-           --backtitle "Happy Hacking Linux" \
-           --defaultno \
-           --no-label "Next Step" \
-           --yes-label "Main Menu" \
-           --yesno "Oh, hai. This is the installation wizard of Happy Hacking Linux. If you already started the installation, you can jump to the main menu and run a specific installation step. Otherwise, just hit the next button. \n\nIf you need help or wanna report an issue, go to github.com/happy-hacking-linux" 13 55
+startingDialogs () {
+    name=$(dialog --stdout \
+                  --title "=^.^=" \
+                  --backtitle "Happy Hacking Linux" \
+                  --defaultno \
+                  --ok-label "Next" \
+                  --nocancel \
+                  --inputbox "Oh, hai. What is your name?" 8 55 "$name")
 
-    selected=$?
+    username=$(echo "$name" | sed -e 's/[^[:alnum:]]/-/g' | tr -s '-' | tr A-Z a-z)
+
+    username=$(dialog --stdout \
+                      --title "=^.^=" \
+                      --backtitle "Happy Hacking Linux" \
+                      --ok-label "Next" \
+                      --nocancel \
+                      --inputbox "And your username preference?" 8 55 "$username")
+
+    dotFilesRepo=$(dialog --stdout \
+                      --title "=^.^=" \
+                      --backtitle "Happy Hacking Linux" \
+                      --ok-label "Next" \
+                      --cancel-label "Skip" \
+                      --inputbox "Where is your dotfiles located?" 8 55 "https://github.com/$username/dotfiles.git")
 }
 
 mainMenu () {
@@ -28,17 +43,17 @@ mainMenu () {
         icon2="${CHECK} "
     fi
 
-    getvar "boot-install-step"
+    getvar "users-step"
     if [ "$value" = "done" ]; then
         icon3="${CHECK} "
     fi
 
-    getvar "localization-step"
+    getvar "install-packages-step"
     if [ "$value" = "done" ]; then
         icon4="${CHECK} "
     fi
 
-    getvar "users-step"
+    getvar "localization-step"
     if [ "$value" = "done" ]; then
         icon5="${CHECK} "
     fi
@@ -47,28 +62,14 @@ mainMenu () {
                       --title "=^.^=" \
                       --backtitle "Happy Hacking Linux" \
                       --ok-label "Select" \
-                      --nocancel \
+                      --cancel-label "Welcome Screen" \
                       --menu "Complete the following installation steps one by one." 16 55 8 \
                       1 "${icon1}Setup Disk Partitions" \
-                      2 "${icon2}Install Core Packages" \
-                      3 "${icon3}Install Boot (GRUB)" \
-                      4 "${icon4}Localization" \
-                      5 "${icon5}Users" \
-                      6 "Install Extras" \
-                      7 "Reboot")
-}
-
-extrasMenu () {
-    selected=$(dialog --stdout \
-                      --title "Install Extras" \
-                      --backtitle "Happy Hacking Linux" \
-                      --ok-label "Install" \
-                      --cancel-label "Main Menu" \
-                      --menu "You can optionally setup some extra stuff, or return to main menu and reboot." 16 55 7 \
-                      1 "dotfiles" \
-                      2 "spacemacs: emacs distribution" \
-                      3 "amix/vimrc: popular vim distributon" \
-                      4 "VirtualBox Guest Additions")
+                      2 "${icon2}Install Core System" \
+                      3 "${icon3}Create Users" \
+                      4 "${icon4}Install Packages" \
+                      5 "${icon5}Localize" \
+                      6 "Reboot")
 }
 
 diskMenu () {

@@ -8,90 +8,83 @@ mainMenuStep () {
     elif [ "$selected" = "2" ]; then
         coreInstallStep
     elif [ "$selected" = "3" ]; then
-        installBootStep
-    elif [ "$selected" = "4" ]; then
-        localizationStep
-    elif [ "$selected" = "5" ]; then
         usersStep
+    elif [ "$selected" = "4" ]; then
+        installPackagesStep
+    elif [ "$selected" = "5" ]; then
+        localizeStep
     elif [ "$selected" = "6" ]; then
-        extrasMenuStep
-    elif [ "$selected" = "7" ]; then
         rebootStep
     else
-        mainMenuStep
-    fi
-}
-
-extrasMenuStep () {
-    extrasMenu
-
-    if [ "$selected" = "1" ]; then
-        dotFilesStep
-    elif [ "$selected" = "2" ]; then
-        installSpacemacsStep
-    elif [ "$selected" = "3" ]; then
-        installVimrcStep
-    elif [ "$selected" = "4" ]; then
-        installVirtualBoxStep
-    else
-        mainMenuStep
+        startingStep
     fi
 }
 
 installVirtualBoxStep () {
-    dialog --infobox "Installing VirtualBox Guest Additions" 10 50; installVirtualBox
-    extrasMenuStep
+    # Install VirtualBox Guest additions if the installation is running in a VirtualBox machine
+    if lspci | grep -i virtualbox -q; then
+        dialog --infobox "Installing VirtualBox Guest Additions" 10 50; installVirtualBox
+    fi
 }
 
-installVimrcStep () {
-    dialog --infobox "Installing amix/vimrc" 10 50; installVimrc
-    extrasMenuStep
-}
-
-installSpacemacsStep () {
-    dialog --infobox "Installing spacemacs" 10 50; installSpacemacs
-    extrasMenuStep
-}
-
-installOhMyZSHStep () {
-    dialog --infobox "Installing ZSH" 10 50; installZSH
-}
-
-installNodeStep () {
-    dialog --infobox "Installing NodeJS" 10 50; installNode
-}
-
-dotFilesStep () {
-    dotFilesDialog
+installDotfilesStep () {
+    getvar "dot-files-repo"
+    dotFilesRepo=$value
 
     if [[ -n "${dotFilesRepo// }" ]]; then
-        setvar "dot-files-repo" $dotFilesRepo
-
         dialog --infobox "Linking your dotfiles in ~/" 10 50; linkDotFiles
 
-        if [ -f /home/$username/$dotFilesBase/happy-hacking-post-install.sh ]; then
-            dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/happy-hacking-post-install.sh
+        if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
+            dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/post-install.sh
         fi
     fi
+}
 
-    extrasMenuStep
+installBootStep () {
+    getvar "boot-install-step"
+    if [ "$value" != "done" ]; then
+        dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
+        setvar "boot-install-step" "done"
+    fi
+}
+
+installPackagesStep () {
+    getvar "install-packages-step"
+    if [ "$value" == "done" ]; then
+        return
+    fi
+
+    dialog --infobox "Upgrading system" 10 50; upgradeSystem
+    dialog --infobox "Installing Oh My ZSH" 10 50; installOhMyZSH
+    dialog --infobox "Installing AUR and Yaourt" 10 50; installYaourt
+    dialog --infobox "Installing Programming Packages" 10 50; installDevTools
+    dialog --infobox "Installing CLI Utilities" 10 50; installDevTools
+    dialog --infobox "Installing Fonts" 10 50; installFonts
+    dialog --infobox "Installing 256 Color Terminal (URXVT)" 10 50; installURXVT
+    dialog --infobox "Installing Xmonad Desktop" 10 50; installDesktop
+
+    installDotfilesStep
+    installVirtualBoxStep
+    installBootStep
+
+    setvar "install-packages-step" "done"
 }
 
 rebootStep () {
-    dialog --infobox "Cya!" 10 50; reboot
+    dialog --infobox "Cya!" 10 50; sleep 3 && reboot
 }
 
 usersStep () {
   getvar "users-step"
   if [ "$value" != "done" ]; then
-      usernameDialog
-      setvar "username" $username
+      getvar "username"
+      username=$value
+
+      getvar "name"
+      name=$value
 
       passwordDialog
-      createUser $username $password
-
-      installOhMyZSHStep
-      installNodeStep
+      createUser $username $password $name
 
       setvar "users-step" "done"
   fi
@@ -109,26 +102,6 @@ localizationStep () {
     usersStep
 }
 
-installBootStep () {
-    getvar "boot-install-step"
-    if [ "$value" != "done" ]; then
-        dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
-        setvar "boot-install-step" "done"
-    fi
-}
-
-switchToLTSStep () {
-    getvar "lts-step"
-    if [ "$value" != "done" ]; then
-        dialog --infobox "Switching to Linux LTS Kernel as it's more stable." 10 50; installLTSKernel
-        setvar "lts-step" "done"
-    fi
-}
-
-installExtraPackagesStep () {
-    dialog --infobox "Installing some additional packages, this may take some time" 10 50; installExtraPackages
-}
-
 coreInstallStep () {
     getvar "core-install-step"
     if [ "$value" != "done" ]; then
@@ -136,13 +109,6 @@ coreInstallStep () {
         afterCoreInstallStep
         setvar "core-install-step" "done"
     fi
-}
-
-afterCoreInstallStep () {
-    installExtraPackagesStep
-    installBootStep
-    switchToLTSStep
-    localizationStep
 }
 
 partitionStep () {
@@ -174,7 +140,11 @@ partitionStep () {
 
 startingStep () {
     init
-    welcomeMenu
+    startingDialogs
+
+    setvar "name" $name
+    setvar "username" $username
+    setvar "dotFilesRepo" $dotFilesRepo
 
     if [ "$selected" = "1" ]; then
         partitionStep

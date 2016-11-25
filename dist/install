@@ -126,9 +126,9 @@ EOF
 }
 
 installGRUB () {
-    pacman -S --noconfirm grub 2> /tmp/err || errorDialog "Failed to install GRUB"
+    pacman -S --noconfirm grub > /dev/null 2> /tmp/err || errorDialog "Failed to install GRUB. Are you connected to internet?"
     getvar "disk"
-    grub-install --target=i386-pc --recheck $value 2> /tmp/err || errorDialog "Failed to install GRUB"
+    grub-install --target=i386-pc --recheck $value > /dev/null 2> /tmp/err || errorDialog "Failed to run grub-install"
 }
 
 localize () {
@@ -146,7 +146,7 @@ localize () {
 }
 
 createUser () {
-    useradd -m -s /usr/bin/zsh $1
+    useradd -m -s /usr/bin/zsh -c $3 $1
     echo "$1:$2" | chpasswd
 
     echo "$1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -161,18 +161,8 @@ linkDotFiles () {
     getvar "username"
     username=$value
 
-    dotFilesBase=$(basename "$dotFilesRepo")
+    dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
     runuser -l $username -c "git clone $dotFilesRepo ~/${dotFilesBase} && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
-}
-
-installLTSKernel () {
-    pacman -S --noconfirm linux-lts linux-lts-headers 2> /tmp/err || errorDialog "Can not install Linux LTS Kernel"
-    sed -i '/GRUB_DEFAULT=0/c\GRUB_DEFAULT=saved' /etc/default/grub
-    sed -i '/GRUB_GFXMODE=auto/c\GRUB_GFXMODE=1024x768x32' /etc/default/grub
-    sed -i -e '/^#GRUB_COLOR_NORMAL/s/^#//' /etc/default/grub
-    sed -i -e '/^#GRUB_COLOR_HIGHLIGHT/s/^#//' /etc/default/grub
-    echo "GRUB_SAVEDEFAULT=true" >> /etc/default/grub
-    echo "GRUB_DISABLE_SUBMENU=y" >> /etc/default/grub
 }
 
 installNode () {
@@ -186,77 +176,123 @@ EOF
 }
 
 installOhMyZSH () {
-    runuser -l azer -c '$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
-}
-
-installSpacemacs () {
-    git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
-}
-
-installVimrc () {
-    git clone git://github.com/amix/vimrc.git ~/.vim_runtime
-    sh ~/.vim_runtime/install_awesome_vimrc.sh
-}
-
-installVimJanus () {
-    curl -L https://bit.ly/janus-bootstrap | bash
+    runuser -l azer -c 'sh -c $(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
 }
 
 installVirtualBox () {
-    pacman --noconfirm -Sy virtualbox-guest-utils virtualbox-guest-modules virtualbox-guest-modules-lts virtualbox-guest-dkms
-    echo "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
-    systemctl enable vboxservice.service
+    if lspci | grep -i virtualbox -q; then
+        pacman --noconfirm -S virtualbox-guest-utils virtualbox-guest-modules-arch virtualbox-guest-dkms
+        echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
+        systemctl enable vboxservice.service
+    fi
 }
 
-installExtraPackages () {
-    pacman --noconfirm -Syu 2> /tmp/err || errorDialog "Can not install updates."
-    pacman -S \
-           --noconfirm \
+upgradeSystem () {
+    pacman --noconfirm -Syu > /dev/null 2> /tmp/err || errorDialog "Can not upgrade the system. Are you connected to internet?"
+    pacman -S --noconfirm \
            base-devel \
            net-tools \
            pkgfile \
            xf86-video-vesa \
-           xorg-server \
-           xorg-server-utils \
-           xorg-apps \
-           ttf-dejavu \
-           ttf-droid \
-           ttf-inconsolata \
-           ttf-symbola \
-           ttf-bitstream-vera \
-           terminus-font \
            curl \
            wget \
            git \
-           tmux \
-           zsh \
-           firefox \
+           grep  > /dev/null 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
+}
+
+installYaourt () {
+    git clone https://aur.archlinux.org/package-query.git /tmp/package-query > /dev/null 2> /tmp/err || errorDialog "Can not install AUR"
+    cd /tmp/package-query
+    yes | makepkg -si > /dev/null 2> /tmp/err || errorDialog "Can not build AUR"
+
+    git clone https://aur.archlinux.org/yaourt.git > /dev/null 2> /tmp/err || errorDialog "Can not install Yaourt"
+    cd /tmp/yaourt
+    yes | makepkg -si 2> /tmp/err || errorDialog "Can not build Yaourt"
+}
+
+installDesktop () {
+    pacman -S --noconfirm xorg \
+           xorg-init \
            xmonad \
+           xmonad-contrib \
            xmobar \
            feh \
+           unclutter \
+           firefox \
            scrot \
-           moc \
-           newsbeuter \
-           dmenu \
-           rxvt-unicode \
+           dmenu > /dev/null 2> /tmp/err || errorDialog "Failed to install desktop packages. Are you connected to internet?"
+}
+
+installDevTools () {
+    pacman -S --noconfirm go \
            emacs \
            vim \
-           htop \
+           node \
            python \
            python-pip \
-           go 2> /tmp/err || errorDialog "Failed to complete installing extra packages"
+           mariadb > /dev/null 2> /tmp/err || errorDialog "Failed to install programming packages. Are you connected to internet?"
+
+    installNode
+}
+
+installCLITools () {
+    pacman -S --noconfirm \
+           tmux \
+           acpi \
+           newsbeuter \
+           htop > /dev/null 2> /tmp/err || errorDialog "Failed to install command-line utilities. Are you connected to internet?"
+}
+
+installMedia () {
+    pacman -S alsa-utils mplayer moc > /dev/null 2> /tmp/err || errorDialog "Failed to install media"
+}
+
+installFonts () {
+    pacman -S ttf-dejavu \
+        ttf-droid \
+        ttf-inconsolata \
+        ttf-symbola \
+        ttf-bitstream-vera \
+        terminus-font \
+        ttf-fira-mono \
+        ttf-fira-sans \
+        adobe-source-code-pro-fonts > /dev/null 2> /tmp/err || errorDialog "Failed to install fonts"
+
+    yaourt -S --noconfirm \
+           ttf-mac-fonts \
+           system-san-francisco-font-git \
+           ttf-monaco > /dev/null 2> /tmp/err || errorDialog "Failed to install Mac fonts. Are you connected to internet?"
+}
+
+installURXVT () {
+    yaourt --noconfirm -S rxvt-unicode-256xresources > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
 }
 CHECK="[OK]"
 
-welcomeMenu () {
-    dialog --title "=^.^=" \
-           --backtitle "Happy Hacking Linux" \
-           --defaultno \
-           --no-label "Next Step" \
-           --yes-label "Main Menu" \
-           --yesno "Oh, hai. This is the installation wizard of Happy Hacking Linux. If you already started the installation, you can jump to the main menu and run a specific installation step. Otherwise, just hit the next button. \n\nIf you need help or wanna report an issue, go to github.com/happy-hacking-linux" 13 55
+startingDialogs () {
+    name=$(dialog --stdout \
+                  --title "=^.^=" \
+                  --backtitle "Happy Hacking Linux" \
+                  --defaultno \
+                  --ok-label "Next" \
+                  --nocancel \
+                  --inputbox "Oh, hai. What is your name?" 8 55 "$name")
 
-    selected=$?
+    username=$(echo "$name" | sed -e 's/[^[:alnum:]]/-/g' | tr -s '-' | tr A-Z a-z)
+
+    username=$(dialog --stdout \
+                      --title "=^.^=" \
+                      --backtitle "Happy Hacking Linux" \
+                      --ok-label "Next" \
+                      --nocancel \
+                      --inputbox "And your username preference?" 8 55 "$username")
+
+    dotFilesRepo=$(dialog --stdout \
+                      --title "=^.^=" \
+                      --backtitle "Happy Hacking Linux" \
+                      --ok-label "Next" \
+                      --cancel-label "Skip" \
+                      --inputbox "Where is your dotfiles located?" 8 55 "https://github.com/$username/dotfiles.git")
 }
 
 mainMenu () {
@@ -276,17 +312,17 @@ mainMenu () {
         icon2="${CHECK} "
     fi
 
-    getvar "boot-install-step"
+    getvar "users-step"
     if [ "$value" = "done" ]; then
         icon3="${CHECK} "
     fi
 
-    getvar "localization-step"
+    getvar "install-packages-step"
     if [ "$value" = "done" ]; then
         icon4="${CHECK} "
     fi
 
-    getvar "users-step"
+    getvar "localization-step"
     if [ "$value" = "done" ]; then
         icon5="${CHECK} "
     fi
@@ -295,28 +331,14 @@ mainMenu () {
                       --title "=^.^=" \
                       --backtitle "Happy Hacking Linux" \
                       --ok-label "Select" \
-                      --nocancel \
+                      --cancel-label "Welcome Screen" \
                       --menu "Complete the following installation steps one by one." 16 55 8 \
                       1 "${icon1}Setup Disk Partitions" \
-                      2 "${icon2}Install Core Packages" \
-                      3 "${icon3}Install Boot (GRUB)" \
-                      4 "${icon4}Localization" \
-                      5 "${icon5}Users" \
-                      6 "Install Extras" \
-                      7 "Reboot")
-}
-
-extrasMenu () {
-    selected=$(dialog --stdout \
-                      --title "Install Extras" \
-                      --backtitle "Happy Hacking Linux" \
-                      --ok-label "Install" \
-                      --cancel-label "Main Menu" \
-                      --menu "You can optionally setup some extra stuff, or return to main menu and reboot." 16 55 7 \
-                      1 "dotfiles" \
-                      2 "spacemacs: emacs distribution" \
-                      3 "amix/vimrc: popular vim distributon" \
-                      4 "VirtualBox Guest Additions")
+                      2 "${icon2}Install Core System" \
+                      3 "${icon3}Create Users" \
+                      4 "${icon4}Install Packages" \
+                      5 "${icon5}Localize" \
+                      6 "Reboot")
 }
 
 diskMenu () {
@@ -455,90 +477,83 @@ mainMenuStep () {
     elif [ "$selected" = "2" ]; then
         coreInstallStep
     elif [ "$selected" = "3" ]; then
-        installBootStep
-    elif [ "$selected" = "4" ]; then
-        localizationStep
-    elif [ "$selected" = "5" ]; then
         usersStep
+    elif [ "$selected" = "4" ]; then
+        installPackagesStep
+    elif [ "$selected" = "5" ]; then
+        localizeStep
     elif [ "$selected" = "6" ]; then
-        extrasMenuStep
-    elif [ "$selected" = "7" ]; then
         rebootStep
     else
-        mainMenuStep
-    fi
-}
-
-extrasMenuStep () {
-    extrasMenu
-
-    if [ "$selected" = "1" ]; then
-        dotFilesStep
-    elif [ "$selected" = "2" ]; then
-        installSpacemacsStep
-    elif [ "$selected" = "3" ]; then
-        installVimrcStep
-    elif [ "$selected" = "4" ]; then
-        installVirtualBoxStep
-    else
-        mainMenuStep
+        startingStep
     fi
 }
 
 installVirtualBoxStep () {
-    dialog --infobox "Installing VirtualBox Guest Additions" 10 50; installVirtualBox
-    extrasMenuStep
+    # Install VirtualBox Guest additions if the installation is running in a VirtualBox machine
+    if lspci | grep -i virtualbox -q; then
+        dialog --infobox "Installing VirtualBox Guest Additions" 10 50; installVirtualBox
+    fi
 }
 
-installVimrcStep () {
-    dialog --infobox "Installing amix/vimrc" 10 50; installVimrc
-    extrasMenuStep
-}
-
-installSpacemacsStep () {
-    dialog --infobox "Installing spacemacs" 10 50; installSpacemacs
-    extrasMenuStep
-}
-
-installOhMyZSHStep () {
-    dialog --infobox "Installing ZSH" 10 50; installZSH
-}
-
-installNodeStep () {
-    dialog --infobox "Installing NodeJS" 10 50; installNode
-}
-
-dotFilesStep () {
-    dotFilesDialog
+installDotfilesStep () {
+    getvar "dot-files-repo"
+    dotFilesRepo=$value
 
     if [[ -n "${dotFilesRepo// }" ]]; then
-        setvar "dot-files-repo" $dotFilesRepo
-
         dialog --infobox "Linking your dotfiles in ~/" 10 50; linkDotFiles
 
-        if [ -f /home/$username/$dotFilesBase/happy-hacking-post-install.sh ]; then
-            dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/happy-hacking-post-install.sh
+        if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
+            dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/post-install.sh
         fi
     fi
+}
 
-    extrasMenuStep
+installBootStep () {
+    getvar "boot-install-step"
+    if [ "$value" != "done" ]; then
+        dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
+        setvar "boot-install-step" "done"
+    fi
+}
+
+installPackagesStep () {
+    getvar "install-packages-step"
+    if [ "$value" == "done" ]; then
+        return
+    fi
+
+    dialog --infobox "Upgrading system" 10 50; upgradeSystem
+    dialog --infobox "Installing Oh My ZSH" 10 50; installOhMyZSH
+    dialog --infobox "Installing AUR and Yaourt" 10 50; installYaourt
+    dialog --infobox "Installing Programming Packages" 10 50; installDevTools
+    dialog --infobox "Installing CLI Utilities" 10 50; installDevTools
+    dialog --infobox "Installing Fonts" 10 50; installFonts
+    dialog --infobox "Installing 256 Color Terminal (URXVT)" 10 50; installURXVT
+    dialog --infobox "Installing Xmonad Desktop" 10 50; installDesktop
+
+    installDotfilesStep
+    installVirtualBoxStep
+    installBootStep
+
+    setvar "install-packages-step" "done"
 }
 
 rebootStep () {
-    dialog --infobox "Cya!" 10 50; reboot
+    dialog --infobox "Cya!" 10 50; sleep 3 && reboot
 }
 
 usersStep () {
   getvar "users-step"
   if [ "$value" != "done" ]; then
-      usernameDialog
-      setvar "username" $username
+      getvar "username"
+      username=$value
+
+      getvar "name"
+      name=$value
 
       passwordDialog
-      createUser $username $password
-
-      installOhMyZSHStep
-      installNodeStep
+      createUser $username $password $name
 
       setvar "users-step" "done"
   fi
@@ -556,26 +571,6 @@ localizationStep () {
     usersStep
 }
 
-installBootStep () {
-    getvar "boot-install-step"
-    if [ "$value" != "done" ]; then
-        dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
-        setvar "boot-install-step" "done"
-    fi
-}
-
-switchToLTSStep () {
-    getvar "lts-step"
-    if [ "$value" != "done" ]; then
-        dialog --infobox "Switching to Linux LTS Kernel as it's more stable." 10 50; installLTSKernel
-        setvar "lts-step" "done"
-    fi
-}
-
-installExtraPackagesStep () {
-    dialog --infobox "Installing some additional packages, this may take some time" 10 50; installExtraPackages
-}
-
 coreInstallStep () {
     getvar "core-install-step"
     if [ "$value" != "done" ]; then
@@ -583,13 +578,6 @@ coreInstallStep () {
         afterCoreInstallStep
         setvar "core-install-step" "done"
     fi
-}
-
-afterCoreInstallStep () {
-    installExtraPackagesStep
-    installBootStep
-    switchToLTSStep
-    localizationStep
 }
 
 partitionStep () {
@@ -621,7 +609,11 @@ partitionStep () {
 
 startingStep () {
     init
-    welcomeMenu
+    startingDialogs
+
+    setvar "name" $name
+    setvar "username" $username
+    setvar "dotFilesRepo" $dotFilesRepo
 
     if [ "$selected" = "1" ]; then
         partitionStep
