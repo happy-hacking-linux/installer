@@ -54,15 +54,15 @@ installPackagesStep () {
         return
     fi
 
-    dialog --infobox "Upgrading system" 10 50; upgradeSystem
-    dialog --infobox "Installing Oh My ZSH" 10 50; installOhMyZSH
-    dialog --infobox "Installing AUR and Yaourt" 10 50; installYaourt
-    dialog --infobox "Installing Programming Packages" 10 50; installDevTools
-    dialog --infobox "Installing CLI Utilities" 10 50; installDevTools
-    dialog --infobox "Installing Fonts" 10 50; installFonts
-    dialog --infobox "Installing 256 Color Terminal (URXVT)" 10 50; installURXVT
-    dialog --infobox "Installing Xmonad Desktop" 10 50; installDesktop
-    dialog --infobox "Installing Default Configuration" 10 50; linkDefaultDotFiles
+    dialog --infobox "Updating the system..." 5 50; upgradeSystem
+    dialog --infobox "Installing Oh My ZSH..." 5 50; installOhMyZSH
+    dialog --infobox "Installing AUR and Yaourt..." 5 50; installYaourt
+    dialog --infobox "Installing Programming Packages..." 5 50; installDevTools
+    dialog --infobox "Installing CLI Utilities..." 5 50; installDevTools
+    dialog --infobox "Installing Fonts..." 5 50; installFonts
+    dialog --infobox "Installing 256 Color Terminal (URXVT)..." 5 50; installURXVT
+    dialog --infobox "Installing Xmonad Desktop..." 5 50; installDesktop
+    dialog --infobox "Installing Default Configuration..." 5 50; linkDefaultDotFiles
 
     installDotFilesStep
     installVirtualBoxStep

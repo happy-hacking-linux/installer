@@ -119,13 +119,25 @@ upgradeSystem () {
 }
 
 installYaourt () {
-    git clone https://aur.archlinux.org/package-query.git /tmp/package-query > /dev/null 2> /tmp/err || errorDialog "Can not install AUR"
-    cd /tmp/package-query
+    getvar "username"
+    username=$value
+
+    (
+	  runuser -l $username -c <<EOF
+git clone https://aur.archlinux.org/package-query.git /tmp/package-query
+cd /tmp/package-query
+yes | makepkg -si
+git clone https://aur.archlinux.org/yaourt.git
+cd /tmp/yaourt
+yes | makepkg -si
+EOF
+    ) > /dev/null 2> /tmp/err || errorDialog "Can not install AUR."
+
     yes | makepkg -si > /dev/null 2> /tmp/err || errorDialog "Can not build AUR"
 
-    git clone https://aur.archlinux.org/yaourt.git > /dev/null 2> /tmp/err || errorDialog "Can not install Yaourt"
-    cd /tmp/yaourt
-    yes | makepkg -si 2> /tmp/err || errorDialog "Can not build Yaourt"
+     > /dev/null 2> /tmp/err || errorDialog "Can not install Yaourt"
+
+     2> /tmp/err || errorDialog "Can not build Yaourt"
 }
 
 installDesktop () {
