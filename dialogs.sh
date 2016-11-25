@@ -188,13 +188,12 @@ errorDialog () {
     mainMenuStep
 }
 
-dotFilesDialog () {
-    getvar "username"
+rebootDialog () {
+    dialog --title "=^.^=" \
+           --backtitle "Happy Hacking Linux" \
+           --yes-label "Reboot" \
+           --no-label "Main Menu" \
+           --yesno "Installation seems to be done, let's reboot your system. Don't forget ejecting the installation disk." 13 55
 
-    dotFilesRepo=$(dialog --stdout \
-                          --title "dotfiles" \
-                          --backtitle "Happy Hacking Linux" \
-                          --cancel-label "Skip" \
-                          --ok-label "Clone & Link All" \
-                          --inputbox "Where is your dotfiles located?" 8 50 "https://github.com/$username/dotfiles.git")
+    selected=$?
 }

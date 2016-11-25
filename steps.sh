@@ -69,10 +69,18 @@ installPackagesStep () {
     installBootStep
 
     setvar "install-packages-step" "done"
+
+    localizeStep
 }
 
 rebootStep () {
-    dialog --infobox "Cya!" 10 50; sleep 3 && reboot
+    rebootDialog
+
+    if [ "$selected" = "0" ]; then
+        dialog --infobox "Cya!" 10 50; sleep 3 && reboot
+    else
+        mainMenu
+    fi
 }
 
 usersStep () {
@@ -90,26 +98,27 @@ usersStep () {
       setvar "users-step" "done"
   fi
 
-  mainMenuStep
+  installPackagesStep
 }
 
-localizationStep () {
+localizeStep () {
     getvar "localization-step"
     if [ "$value" != "done" ]; then
         localize
         setvar "localization-step" "done"
     fi
 
-    usersStep
+    rebootStep
 }
 
 coreInstallStep () {
     getvar "core-install-step"
     if [ "$value" != "done" ]; then
         dialog --infobox "Installing core system packages, please wait..." 10 50; installCoreSystem
-        afterCoreInstallStep
         setvar "core-install-step" "done"
     fi
+
+    usersStep
 }
 
 partitionStep () {
@@ -140,6 +149,11 @@ partitionStep () {
 }
 
 startingStep () {
+    getvar "starting-step"
+    if [ "$value" == "done" ]; then
+        mainMenu
+    fi
+
     init
     startingDialogs
 
@@ -147,11 +161,12 @@ startingStep () {
     setvar "username" $username
     setvar "dotFilesRepo" $dotFilesRepo
 
+    setvar "starting-step" "done"
     partitionStep
 }
 
 if [ "$command" = "continue" ]; then
-    afterCoreInstallStep
+    installPackagesStep
 else
     startingStep
 fi
