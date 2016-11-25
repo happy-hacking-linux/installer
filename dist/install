@@ -155,18 +155,18 @@ createUser () {
 }
 
 linkDotFiles () {
-    getvar "dot-files-repo"
-    dotFilesRepo=$value
-
     getvar "username"
     username=$value
 
-    dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
-    runuser -l $username -c "git clone $dotFilesRepo ~/${dotFilesBase} && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
+    dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
+    runuser -l $username -c "git clone $1 ~/${dotFilesBase} && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
 installNode () {
-	  runuser -l azer -c <<EOF
+    getvar "username"
+    username=$value
+
+	  runuser -l $username -c <<EOF
 curl https://raw.github.com/creationix/nvm/master/install.sh | bash
 source ~/.nvm/nvm.sh
 nvm install 7.1.0
@@ -496,12 +496,12 @@ installVirtualBoxStep () {
     fi
 }
 
-installDotfilesStep () {
+installDotFilesStep () {
     getvar "dot-files-repo"
     dotFilesRepo=$value
 
     if [[ -n "${dotFilesRepo// }" ]]; then
-        dialog --infobox "Linking your dotfiles in ~/" 10 50; linkDotFiles
+        dialog --infobox "Linking your dotfiles into ~/" 10 50; linkDotFiles $1
 
         if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
             dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/post-install.sh
@@ -532,7 +532,8 @@ installPackagesStep () {
     dialog --infobox "Installing 256 Color Terminal (URXVT)" 10 50; installURXVT
     dialog --infobox "Installing Xmonad Desktop" 10 50; installDesktop
 
-    installDotfilesStep
+    linkDotFiles "https://github.com/happy-hacking-linux/dotfiles.git"
+    installDotFilesStep
     installVirtualBoxStep
     installBootStep
 

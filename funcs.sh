@@ -66,18 +66,18 @@ createUser () {
 }
 
 linkDotFiles () {
-    getvar "dot-files-repo"
-    dotFilesRepo=$value
-
     getvar "username"
     username=$value
 
-    dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
-    runuser -l $username -c "git clone $dotFilesRepo ~/${dotFilesBase} && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles :/"
+    dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
+    runuser -l $username -c "git clone $1 ~/${dotFilesBase} && ln -f -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
 installNode () {
-	  runuser -l azer -c <<EOF
+    getvar "username"
+    username=$value
+
+	  runuser -l $username -c <<EOF
 curl https://raw.github.com/creationix/nvm/master/install.sh | bash
 source ~/.nvm/nvm.sh
 nvm install 7.1.0

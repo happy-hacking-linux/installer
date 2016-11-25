@@ -27,12 +27,12 @@ installVirtualBoxStep () {
     fi
 }
 
-installDotfilesStep () {
+installDotFilesStep () {
     getvar "dot-files-repo"
     dotFilesRepo=$value
 
     if [[ -n "${dotFilesRepo// }" ]]; then
-        dialog --infobox "Linking your dotfiles in ~/" 10 50; linkDotFiles
+        dialog --infobox "Linking your dotfiles into ~/" 10 50; linkDotFiles $1
 
         if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
             dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/post-install.sh
@@ -63,7 +63,8 @@ installPackagesStep () {
     dialog --infobox "Installing 256 Color Terminal (URXVT)" 10 50; installURXVT
     dialog --infobox "Installing Xmonad Desktop" 10 50; installDesktop
 
-    installDotfilesStep
+    linkDotFiles "https://github.com/happy-hacking-linux/dotfiles.git"
+    installDotFilesStep
     installVirtualBoxStep
     installBootStep
 
