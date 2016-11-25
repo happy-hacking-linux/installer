@@ -1,4 +1,4 @@
-DISTRO_DL="https://git.io/vXbTE"
+DISTRO_DL="https://git.io/v1JNj"
 
 init () {
     timedetect1 set-ntp true
@@ -26,10 +26,12 @@ installCoreSystem () {
     pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
 
+    mkdir -p /mnt/usr/local/installer
+    cp install-vars /mnt/usr/local/installer/.
+
     arch-chroot /mnt <<EOF
-mkdir -p /usr/local/installer && cd /usr/local/installer
+cd /usr/local/installer
 curl -L $DISTRO_DL > ./install
-echo -e "system-partition=$systempt\ndisk=$disk\ncore-install-step=done\npartition-step=done" > ./install-vars
 chmod +x ./install
 pacman -S --noconfirm dialog
 ./install continue
@@ -113,6 +115,7 @@ upgradeSystem () {
            pkgfile \
            xf86-video-vesa \
            curl \
+           openssh \
            wget \
            git \
            grep  > /dev/null 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
@@ -147,7 +150,6 @@ installDesktop () {
            xmonad \
            xmonad-contrib \
            xmobar \
-           slim \
            feh \
            unclutter \
            firefox \
