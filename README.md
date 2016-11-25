@@ -6,6 +6,6 @@ Graphical installation wizard for Happy Hacking Linux.
 
 Run: 
 ```
-curl -L https://git.io/vXbTE | bash
+curl -L https://git.io/v1JNj | bash
 ```
 
