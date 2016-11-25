@@ -73,6 +73,13 @@ linkDotFiles () {
     runuser -l $username -c "git clone $1 ~/${dotFilesBase} && ln -f -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
+linkDefaultDotFiles () {
+    getvar "username"
+    username=$value
+    repo="https://github.com/happy-hacking-linux/dotfiles.git"
+    runuser -l $username -c "git clone $1 /tmp/dotfiles && ln -f -s /tmp/dotfiles/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+}
+
 installNode () {
     getvar "username"
     username=$value

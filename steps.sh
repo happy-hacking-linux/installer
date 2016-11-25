@@ -62,8 +62,8 @@ installPackagesStep () {
     dialog --infobox "Installing Fonts" 10 50; installFonts
     dialog --infobox "Installing 256 Color Terminal (URXVT)" 10 50; installURXVT
     dialog --infobox "Installing Xmonad Desktop" 10 50; installDesktop
+    dialog --infobox "Installing Default Configuration" 10 50; linkDefaultDotFiles
 
-    linkDotFiles "https://github.com/happy-hacking-linux/dotfiles.git"
     installDotFilesStep
     installVirtualBoxStep
     installBootStep

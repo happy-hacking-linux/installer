@@ -159,7 +159,14 @@ linkDotFiles () {
     username=$value
 
     dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
-    runuser -l $username -c "git clone $1 ~/${dotFilesBase} && ln -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone $1 ~/${dotFilesBase} && ln -f -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+}
+
+linkDefaultDotFiles () {
+    getvar "username"
+    username=$value
+    repo="https://github.com/happy-hacking-linux/dotfiles.git"
+    runuser -l $username -c "git clone $1 /tmp/dotfiles && ln -f -s /tmp/dotfiles/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
 installNode () {
@@ -531,8 +538,8 @@ installPackagesStep () {
     dialog --infobox "Installing Fonts" 10 50; installFonts
     dialog --infobox "Installing 256 Color Terminal (URXVT)" 10 50; installURXVT
     dialog --infobox "Installing Xmonad Desktop" 10 50; installDesktop
+    dialog --infobox "Installing Default Configuration" 10 50; linkDefaultDotFiles
 
-    linkDotFiles "https://github.com/happy-hacking-linux/dotfiles.git"
     installDotFilesStep
     installVirtualBoxStep
     installBootStep
