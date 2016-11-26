@@ -18,8 +18,6 @@ startingDialogs () {
                       --nocancel \
                       --inputbox "And your username preference?" 8 55 "$username")
 
-    passwordDialog
-
     dotFilesRepo=$(dialog --stdout \
                       --title "=^.^=" \
                       --backtitle "Happy Hacking Linux" \

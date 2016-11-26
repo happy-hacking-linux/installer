@@ -95,6 +95,8 @@ usersStep () {
       return
   fi
 
+  passwordDialog
+
   getvar "username"
   username=$value
 
