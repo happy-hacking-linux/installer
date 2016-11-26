@@ -177,7 +177,7 @@ startingStep () {
 }
 
 if [ "$command" = "continue" ]; then
-    installPackagesStep
+    usersStep
 else
     startingStep
 fi
