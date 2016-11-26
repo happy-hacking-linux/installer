@@ -88,7 +88,7 @@ installZSH () {
 }
 
 installOhMyZSH () {
-    runuser -l azer -c 'sh -c $(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
+    yaourt --noconfirm -S oh-my-zsh-git > /dev/null 2> /tmp/err || errorDialog "Cannot install oh-my-zsh, are your connected to internet?"
 }
 
 installVirtualBox () {

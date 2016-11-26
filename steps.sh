@@ -52,6 +52,16 @@ installBootStep () {
     fi
 }
 
+installYaourtStep () {
+    getvar "install-yaourt-step"
+    if [ "$value" == "done" ]; then
+        return
+    fi
+
+    dialog --infobox "Installing AUR and Yaourt..." 5 50; installYaourt
+    setvar "install-yaourt-step" "done"
+}
+
 installPackagesStep () {
     getvar "install-packages-step"
     if [ "$value" == "done" ]; then
@@ -59,8 +69,9 @@ installPackagesStep () {
         return
     fi
 
+    installYaourtStep
+
     dialog --infobox "Installing Oh My ZSH..." 5 50; installOhMyZSH
-    dialog --infobox "Installing AUR and Yaourt..." 5 50; installYaourt
     dialog --infobox "Installing Programming Packages..." 5 50; installDevTools
     dialog --infobox "Installing CLI Utilities..." 5 50; installDevTools
     dialog --infobox "Installing Fonts..." 5 50; installFonts
