@@ -179,7 +179,7 @@ installNode () {
 }
 
 installZSH () {
-    pacman -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
+    pacman --noconfirm -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
     chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
 }
 
@@ -206,6 +206,8 @@ installBasicPackages () {
            wget \
            git \
            grep  > /dev/null 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
+
+    installZSH
 }
 
 installYaourt () {
@@ -541,7 +543,6 @@ installPackagesStep () {
         return
     fi
 
-    dialog --infobox "Installing some basic packages..." 5 50; installBasicPackages
     dialog --infobox "Installing Oh My ZSH..." 5 50; installOhMyZSH
     dialog --infobox "Installing AUR and Yaourt..." 5 50; installYaourt
     dialog --infobox "Installing Programming Packages..." 5 50; installDevTools
@@ -583,7 +584,8 @@ usersStep () {
   getvar "username"
   username=$value
 
-  dialog --infobox "Installing a better shell (ZSH)..." 5 50; installZSH
+  dialog --infobox "Installing some basic packages before creating users..." 5 50; installBasicPackages
+
   createUser $username $password
 
   setvar "users-step" "done"

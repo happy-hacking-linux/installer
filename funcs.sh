@@ -90,7 +90,7 @@ installNode () {
 }
 
 installZSH () {
-    pacman -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
+    pacman --noconfirm -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
     chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
 }
 
@@ -117,6 +117,8 @@ installBasicPackages () {
            wget \
            git \
            grep  > /dev/null 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
+
+    installZSH
 }
 
 installYaourt () {
