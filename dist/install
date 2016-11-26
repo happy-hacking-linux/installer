@@ -484,9 +484,6 @@ command=$1
 mainMenuStep () {
     mainMenu
 
-    echo "$username $password"
-    exit
-
     if [ "$button" = "1" ]; then
         setvar "starting-step" ""
         startingStep
@@ -661,7 +658,7 @@ startingStep () {
 }
 
 if [ "$command" = "continue" ]; then
-    installPackagesStep
+    usersStep
 else
     startingStep
 fi
