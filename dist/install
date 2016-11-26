@@ -123,7 +123,7 @@ cd /usr/local/installer
 curl -L $DISTRO_DL > ./install
 chmod +x ./install
 pacman -S --noconfirm dialog
-./install continue
+./install continue 2> ./error-logs
 EOF
 }
 
@@ -294,6 +294,8 @@ startingDialogs () {
                       --nocancel \
                       --inputbox "And your username preference?" 8 55 "$username")
 
+    passwordDialog
+
     dotFilesRepo=$(dialog --stdout \
                       --title "=^.^=" \
                       --backtitle "Happy Hacking Linux" \
@@ -449,7 +451,7 @@ passwordDialog () {
     if [[ -z "${password// }" ]]; then
         dialog --title "Password" \
                --backtitle "Happy Hacking Linux" \
-               --msgbox "A password is required. Try again." 5 50
+               --msgbox "A password is required. Try again please." 5 50
         passwordDialog
     fi
 }
@@ -481,6 +483,9 @@ command=$1
 
 mainMenuStep () {
     mainMenu
+
+    echo "$username $password"
+    exit
 
     if [ "$button" = "1" ]; then
         setvar "starting-step" ""
@@ -577,11 +582,7 @@ usersStep () {
   getvar "username"
   username=$value
 
-  getvar "name"
-  name=$value
-
-  passwordDialog
-  createUser $username $password $name
+  createUser $username $password
 
   setvar "users-step" "done"
   installPackagesStep

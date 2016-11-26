@@ -98,11 +98,7 @@ usersStep () {
   getvar "username"
   username=$value
 
-  getvar "name"
-  name=$value
-
-  passwordDialog
-  createUser $username $password $name
+  createUser $username $password
 
   setvar "users-step" "done"
   installPackagesStep

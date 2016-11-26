@@ -34,7 +34,7 @@ cd /usr/local/installer
 curl -L $DISTRO_DL > ./install
 chmod +x ./install
 pacman -S --noconfirm dialog
-./install continue
+./install continue 2> ./error-logs
 EOF
 }
 

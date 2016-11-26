@@ -18,6 +18,8 @@ startingDialogs () {
                       --nocancel \
                       --inputbox "And your username preference?" 8 55 "$username")
 
+    passwordDialog
+
     dotFilesRepo=$(dialog --stdout \
                       --title "=^.^=" \
                       --backtitle "Happy Hacking Linux" \
@@ -173,7 +175,7 @@ passwordDialog () {
     if [[ -z "${password// }" ]]; then
         dialog --title "Password" \
                --backtitle "Happy Hacking Linux" \
-               --msgbox "A password is required. Try again." 5 50
+               --msgbox "A password is required. Try again please." 5 50
         passwordDialog
     fi
 }
