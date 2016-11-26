@@ -55,6 +55,7 @@ installBootStep () {
 installPackagesStep () {
     getvar "install-packages-step"
     if [ "$value" == "done" ]; then
+        localizeStep
         return
     fi
 
@@ -82,7 +83,7 @@ rebootStep () {
     if [ "$selected" = "0" ]; then
         dialog --infobox "Cya!" 10 50; sleep 3 && reboot
     else
-        mainMenu
+        mainMenuStep
     fi
 }
 
@@ -124,6 +125,7 @@ coreInstallStep () {
         setvar "core-install-step" "done"
     fi
 
+    setvar "core-install-step" "done"
     usersStep
 }
 
@@ -165,7 +167,7 @@ partitionStep () {
 startingStep () {
     getvar "starting-step"
     if [ "$value" == "done" ]; then
-        mainMenu
+        mainMenuStep
     fi
 
     init
