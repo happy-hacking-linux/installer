@@ -58,7 +58,7 @@ installPackagesStep () {
         return
     fi
 
-    dialog --infobox "Updating the system..." 5 50; upgradeSystem
+    dialog --infobox "Installing some basic packages..." 5 50; installBasicPackages
     dialog --infobox "Installing Oh My ZSH..." 5 50; installOhMyZSH
     dialog --infobox "Installing AUR and Yaourt..." 5 50; installYaourt
     dialog --infobox "Installing Programming Packages..." 5 50; installDevTools
@@ -100,6 +100,7 @@ usersStep () {
   getvar "username"
   username=$value
 
+  dialog --infobox "Installing a better shell (ZSH)..." 5 50; installZSH
   createUser $username $password
 
   setvar "users-step" "done"

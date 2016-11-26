@@ -89,6 +89,11 @@ installNode () {
     runuser -l $username -c "source ~/.nvm/nvm.sh; nvm install 7.1.0; nvm use 7.1.0; nvm alias default 7.1.0"
 }
 
+installZSH () {
+    pacman -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
+    chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
+}
+
 installOhMyZSH () {
     runuser -l azer -c 'sh -c $(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
 }
@@ -101,14 +106,13 @@ installVirtualBox () {
     fi
 }
 
-upgradeSystem () {
-    pacman --noconfirm -Syu > /dev/null 2> /tmp/err || errorDialog "Can not upgrade the system. Are you connected to internet?"
+installBasicPackages () {
+    pacman --noconfirm -Syu > /dev/null 2> /tmp/err || errorDialog "Failed to install some basic packages."
     pacman -S --noconfirm \
            base-devel \
            net-tools \
            pkgfile \
            xf86-video-vesa \
-           curl \
            openssh \
            wget \
            git \

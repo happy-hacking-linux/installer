@@ -178,6 +178,11 @@ installNode () {
     runuser -l $username -c "source ~/.nvm/nvm.sh; nvm install 7.1.0; nvm use 7.1.0; nvm alias default 7.1.0"
 }
 
+installZSH () {
+    pacman -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
+    chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
+}
+
 installOhMyZSH () {
     runuser -l azer -c 'sh -c $(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
 }
@@ -190,14 +195,13 @@ installVirtualBox () {
     fi
 }
 
-upgradeSystem () {
-    pacman --noconfirm -Syu > /dev/null 2> /tmp/err || errorDialog "Can not upgrade the system. Are you connected to internet?"
+installBasicPackages () {
+    pacman --noconfirm -Syu > /dev/null 2> /tmp/err || errorDialog "Failed to install some basic packages."
     pacman -S --noconfirm \
            base-devel \
            net-tools \
            pkgfile \
            xf86-video-vesa \
-           curl \
            openssh \
            wget \
            git \
@@ -537,7 +541,7 @@ installPackagesStep () {
         return
     fi
 
-    dialog --infobox "Updating the system..." 5 50; upgradeSystem
+    dialog --infobox "Installing some basic packages..." 5 50; installBasicPackages
     dialog --infobox "Installing Oh My ZSH..." 5 50; installOhMyZSH
     dialog --infobox "Installing AUR and Yaourt..." 5 50; installYaourt
     dialog --infobox "Installing Programming Packages..." 5 50; installDevTools
@@ -579,6 +583,7 @@ usersStep () {
   getvar "username"
   username=$value
 
+  dialog --infobox "Installing a better shell (ZSH)..." 5 50; installZSH
   createUser $username $password
 
   setvar "users-step" "done"
