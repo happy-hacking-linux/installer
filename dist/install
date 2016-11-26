@@ -174,14 +174,8 @@ linkDefaultDotFiles () {
 installNode () {
     getvar "username"
     username=$value
-
-	  runuser -l $username -c <<EOF
-curl https://raw.github.com/creationix/nvm/master/install.sh | bash
-source ~/.nvm/nvm.sh
-nvm install 7.1.0
-nvm use 7.1.0
-nvm alias default 0.10
-EOF
+    runuser -l $username -c "curl https://raw.github.com/creationix/nvm/master/install.sh | bash"
+    runuser -l $username -c "source ~/.nvm/nvm.sh; nvm install 7.1.0; nvm use 7.1.0; nvm alias default 7.1.0"
 }
 
 installOhMyZSH () {
@@ -214,22 +208,10 @@ installYaourt () {
     getvar "username"
     username=$value
 
-    (
-	  runuser -l $username -c <<EOF
-git clone https://aur.archlinux.org/package-query.git /tmp/package-query
-cd /tmp/package-query
-yes | makepkg -si
-git clone https://aur.archlinux.org/yaourt.git
-cd /tmp/yaourt
-yes | makepkg -si
-EOF
-    ) > /dev/null 2> /tmp/err || errorDialog "Can not install AUR."
-
-    yes | makepkg -si > /dev/null 2> /tmp/err || errorDialog "Can not build AUR"
-
-     > /dev/null 2> /tmp/err || errorDialog "Can not install Yaourt"
-
-     2> /tmp/err || errorDialog "Can not build Yaourt"
+    runuser -l $username -c "git clone https://aur.archlinux.org/package-query.git /tmp/package-query" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
+    runuser -l $username -c "cd /tmp/package-query && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build package-query."
+    runuser -l $username -c "git clone https://aur.archlinux.org/yaourt.git /tmp/yaourt" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
+    runuser -l $username -c "cd /tmp/yaourt && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build Yaourt"
 }
 
 installDesktop () {
