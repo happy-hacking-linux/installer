@@ -131,7 +131,8 @@ EOF
 installGRUB () {
     pacman -S --noconfirm grub > /dev/null 2> /tmp/err || errorDialog "Failed to install GRUB. Are you connected to internet?"
     getvar "disk"
-    grub-install --target=i386-pc --recheck $value > /dev/null 2> /tmp/err || errorDialog "Failed to run grub-install"
+    grub-install --target=i386-pc --recheck $value > /dev/null 2> /tmp/err || errorDialog "Something got screwed and we failed to run grub-install"
+    grub-mkconfig -o /boot/grub/grub.cfg > /dev/null 2> /tmp/err || errorDiaolog "Something got screwed up and we failed to create GRUB config."
 }
 
 localize () {
