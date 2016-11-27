@@ -27,7 +27,7 @@ mainMenuStep () {
 installVirtualBoxStep () {
     # Install VirtualBox Guest additions if the installation is running in a VirtualBox machine
     if lspci | grep -i virtualbox -q; then
-        dialog --infobox "Installing VirtualBox Guest Additions" 10 50; installVirtualBox
+        dialog --infobox "Installing VirtualBox Guest Additions" 5 50; installVirtualBox
     fi
 }
 
@@ -36,11 +36,11 @@ installDotFilesStep () {
     dotFilesRepo=$value
 
     if [[ -n "${dotFilesRepo// }" ]]; then
-        dialog --infobox "Linking your dotfiles into ~/" 10 50; linkDotFiles $1
+        dialog --infobox "Linking your dotfiles into ~/" 5 50; linkDotFiles $1
 
         dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
         if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
-            dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/post-install.sh
+            dialog --infobox "Running personal post-install commands..." 5 50; runuser -l $username -c "sh /home/$username/$dotFilesBase/post-install.sh"
         fi
     fi
 }
