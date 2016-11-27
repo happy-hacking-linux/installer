@@ -31,6 +31,7 @@ tzSelectionMenu () {
 
            if [ "$selected" = "0" ]; then
                tzupdate > /dev/null
+               return
            fi
         fi
     fi

@@ -47,7 +47,7 @@ installDotFilesStep () {
 installBootStep () {
     getvar "boot-install-step"
     if [ "$value" != "done" ]; then
-        dialog --infobox "Installing GRUB for /boot" 10 50; installGRUB
+        dialog --infobox "Installing GRUB for /boot" 5 50; installGRUB
         setvar "boot-install-step" "done"
     fi
 }
