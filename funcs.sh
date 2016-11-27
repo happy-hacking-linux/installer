@@ -138,8 +138,6 @@ installDesktop () {
            unclutter \
            scrot \
            dmenu > /dev/null 2> /tmp/err || errorDialog "Failed to install desktop packages. Are you connected to internet?"
-
-    systemctl enable slim /dev/null 2> /tmp/err || errorDialog "Can not enable the login manager, SLIM."
 }
 
 installDevTools () {
