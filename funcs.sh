@@ -36,13 +36,6 @@ chmod +x ./install
 pacman -S --noconfirm dialog
 ./install continue 2> ./error-logs
 EOF
-
-dialog --title "=^.^=" \
-       --backtitle "Happy Hacking Linux" \
-       --yes-label "Reboot" \
-       --no-label "Main Menu" \
-       --yesno "Installation seems to be done, let's reboot your system. Don't forget ejecting the installation disk." 13 55
-[ "$?" = "0" ] && reboot
 }
 
 installGRUB () {
