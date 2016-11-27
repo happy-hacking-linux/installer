@@ -229,21 +229,14 @@ installDesktop () {
 }
 
 installDevTools () {
-    pacman -S --noconfirm go \
-           emacs \
-           vim \
-           nodejs \
+    pacman -S --noconfirm \
            python \
-           python-pip \
-           mariadb > /dev/null 2> /tmp/err || errorDialog "Failed to install programming packages. Are you connected to internet?"
+           python-pip > /dev/null 2> /tmp/err || errorDialog "Failed to install programming packages. Are you connected to internet?"
 }
 
 installCLITools () {
     pacman -S --noconfirm \
-           tmux \
            acpi \
-           newsbeuter \
-           irssi \
            powertop \
            htop > /dev/null 2> /tmp/err || errorDialog "Failed to install command-line utilities. Are you connected to internet?"
 }
@@ -256,15 +249,8 @@ installMedia () {
 }
 
 installFonts () {
-    pacman -S --noconfirm ttf-dejavu \
-        ttf-droid \
-        ttf-inconsolata \
-        ttf-symbola \
-        ttf-bitstream-vera \
-        terminus-font \
-        ttf-fira-mono \
-        ttf-fira-sans \
-        adobe-source-code-pro-fonts > /dev/null 2> /tmp/err || errorDialog "Failed to install fonts"
+    pacman -S --noconfirm \
+           ttf-symbola> /dev/null 2> /tmp/err || errorDialog "Failed to install fonts"
 
     getvar "$username"
     username=$value
