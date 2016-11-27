@@ -130,7 +130,7 @@ installYaourt () {
 installDesktop () {
     pacman -S --noconfirm \
            xorg \
-           xorg-init \
+           xorg-xinit \
            xmonad \
            xmonad-contrib \
            xmobar \
