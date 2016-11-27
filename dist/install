@@ -161,15 +161,14 @@ createUser () {
 linkDotFiles () {
     getvar "username"
     username=$value
-
     dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
-    runuser -l $username -c "git clone $1 ~/${dotFilesBase} && ln -f -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone $1 /home/$username/${dotFilesBase} && ln -f -s /home/$username/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
-linkDefaultDotFiles () {
+installDefaultDotFiles () {
     getvar "username"
     username=$value
-    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/dotfiles.git /tmp/dotfiles && ln -f -s /tmp/dotfiles/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/dotfiles.git /tmp/dotfiles && cp -f /tmp/dotfiles/.* ~/. && rm -rf ~/.git" > /dev/null 2> /tmp/err || errorDialog "Failed to install the default Happy Hacking dotfiles :/"
 }
 
 installZSH () {
@@ -516,6 +515,7 @@ installDotFilesStep () {
     if [[ -n "${dotFilesRepo// }" ]]; then
         dialog --infobox "Linking your dotfiles into ~/" 10 50; linkDotFiles $1
 
+        dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
         if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
             dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/post-install.sh
         fi
@@ -555,7 +555,7 @@ installPackagesStep () {
     dialog --infobox "Installing Fonts..." 5 50; installFonts
     dialog --infobox "Installing 256 Color Terminal (URXVT)..." 5 50; installURXVT
     dialog --infobox "Installing Xmonad Desktop..." 5 50; installDesktop
-    dialog --infobox "Installing Default Configuration..." 5 50; linkDefaultDotFiles
+    dialog --infobox "Installing Default Configuration..." 5 50; installDefaultDotFiles
 
     installDotFilesStep
     installVirtualBoxStep

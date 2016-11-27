@@ -38,6 +38,7 @@ installDotFilesStep () {
     if [[ -n "${dotFilesRepo// }" ]]; then
         dialog --infobox "Linking your dotfiles into ~/" 10 50; linkDotFiles $1
 
+        dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
         if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
             dialog --infobox "Running personal post-install commands..." 10 50; sh /home/$username/$dotFilesBase/post-install.sh
         fi
@@ -77,7 +78,7 @@ installPackagesStep () {
     dialog --infobox "Installing Fonts..." 5 50; installFonts
     dialog --infobox "Installing 256 Color Terminal (URXVT)..." 5 50; installURXVT
     dialog --infobox "Installing Xmonad Desktop..." 5 50; installDesktop
-    dialog --infobox "Installing Default Configuration..." 5 50; linkDefaultDotFiles
+    dialog --infobox "Installing Default Configuration..." 5 50; installDefaultDotFiles
 
     installDotFilesStep
     installVirtualBoxStep

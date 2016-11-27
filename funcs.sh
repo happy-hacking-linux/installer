@@ -71,15 +71,14 @@ createUser () {
 linkDotFiles () {
     getvar "username"
     username=$value
-
     dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
-    runuser -l $username -c "git clone $1 ~/${dotFilesBase} && ln -f -s ~/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone $1 /home/$username/${dotFilesBase} && ln -f -s /home/$username/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
-linkDefaultDotFiles () {
+installDefaultDotFiles () {
     getvar "username"
     username=$value
-    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/dotfiles.git /tmp/dotfiles && ln -f -s /tmp/dotfiles/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/dotfiles.git /tmp/dotfiles && cp -f /tmp/dotfiles/.* ~/. && rm -rf ~/.git" > /dev/null 2> /tmp/err || errorDialog "Failed to install the default Happy Hacking dotfiles :/"
 }
 
 installZSH () {
