@@ -125,6 +125,12 @@ curl -L $DISTRO_DL > ./install
 chmod +x ./install
 pacman -S --noconfirm dialog
 ./install continue 2> ./error-logs
+dialog --title "=^.^=" \
+       --backtitle "Happy Hacking Linux" \
+       --yes-label "Reboot" \
+       --no-label "Main Menu" \
+       --yesno "Installation seems to be done, let's reboot your system. Don't forget ejecting the installation disk." 13 55
+[ "$?" = "0" ] && reboot
 EOF
 }
 
@@ -476,16 +482,6 @@ errorDialog () {
     rm /tmp/err
     mainMenuStep
 }
-
-rebootDialog () {
-    dialog --title "=^.^=" \
-           --backtitle "Happy Hacking Linux" \
-           --yes-label "Reboot" \
-           --no-label "Main Menu" \
-           --yesno "Installation seems to be done, let's reboot your system. Don't forget ejecting the installation disk." 13 55
-
-    selected=$?
-}
 command=$1
 
 mainMenuStep () {
@@ -508,7 +504,7 @@ mainMenuStep () {
     elif [ "$selected" = "5" ]; then
         localizeStep
     elif [ "$selected" = "6" ]; then
-        rebootStep
+        exitStep
     fi
 }
 
@@ -576,16 +572,8 @@ installPackagesStep () {
     localizeStep
 }
 
-rebootStep () {
-    rebootDialog
-
-    if [ "$selected" = "0" ]; then
-        dialog --infobox "Cya!" 5 50; sleep 1
-        exit
-        reboot
-    else
-        mainMenuStep
-    fi
+exitStep () {
+    exit
 }
 
 usersStep () {
@@ -616,7 +604,7 @@ localizeStep () {
         setvar "localization-step" "done"
     fi
 
-    rebootStep
+    exitStep
 }
 
 coreInstallStep () {

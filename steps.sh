@@ -20,7 +20,7 @@ mainMenuStep () {
     elif [ "$selected" = "5" ]; then
         localizeStep
     elif [ "$selected" = "6" ]; then
-        rebootStep
+        exitStep
     fi
 }
 
@@ -88,16 +88,8 @@ installPackagesStep () {
     localizeStep
 }
 
-rebootStep () {
-    rebootDialog
-
-    if [ "$selected" = "0" ]; then
-        dialog --infobox "Cya!" 5 50; sleep 1
-        exit
-        reboot
-    else
-        mainMenuStep
-    fi
+exitStep () {
+    exit
 }
 
 usersStep () {
@@ -128,7 +120,7 @@ localizeStep () {
         setvar "localization-step" "done"
     fi
 
-    rebootStep
+    exitStep
 }
 
 coreInstallStep () {
