@@ -78,8 +78,7 @@ linkDotFiles () {
 linkDefaultDotFiles () {
     getvar "username"
     username=$value
-    repo="https://github.com/happy-hacking-linux/dotfiles.git"
-    runuser -l $username -c "git clone $1 /tmp/dotfiles && ln -f -s /tmp/dotfiles/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/dotfiles.git /tmp/dotfiles && ln -f -s /tmp/dotfiles/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
 installZSH () {
