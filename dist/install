@@ -246,15 +246,20 @@ installCLITools () {
            tmux \
            acpi \
            newsbeuter \
+           irssi \
+           powertop \
            htop > /dev/null 2> /tmp/err || errorDialog "Failed to install command-line utilities. Are you connected to internet?"
 }
 
 installMedia () {
-    pacman -S alsa-utils mplayer moc > /dev/null 2> /tmp/err || errorDialog "Failed to install media"
+    pacman -S --noconfirm \
+        alsa-utils \
+        mplayer \
+        moc > /dev/null 2> /tmp/err || errorDialog "Failed to install media"
 }
 
 installFonts () {
-    pacman -S ttf-dejavu \
+    pacman -S --noconfirm ttf-dejavu \
         ttf-droid \
         ttf-inconsolata \
         ttf-symbola \
