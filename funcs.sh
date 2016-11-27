@@ -91,9 +91,7 @@ installOhMyZSH () {
     getvar "$username"
     username=$value
 
-    su - $username
-    yaourt --noconfirm -S oh-my-zsh-git > /dev/null 2> /tmp/err || errorDialog "Cannot install oh-my-zsh, are your connected to internet?"
-    exit 
+    runuser -l $username -c 'yaourt --noconfirm -S oh-my-zsh-git > /dev/null 3> /tmp/err || errorDialog "Cannot install oh-my-zsh, are your connected to internet?"'
 }
 
 installVirtualBox () {
@@ -180,18 +178,14 @@ installFonts () {
 
     getvar "$username"
     username=$value
-    su - $username
-    yaourt -S --noconfirm \
+    runuser -l $username -c 'yaourt -S --noconfirm \
            ttf-mac-fonts \
            system-san-francisco-font-git \
-           ttf-monaco > /dev/null 2> /tmp/err || errorDialog "Failed to install Mac fonts. Are you connected to internet?"
-    exit
+           ttf-monaco > /dev/null 2> /tmp/err || errorDialog "Failed to install Mac fonts. Are you connected to internet?"'
 }
 
 installURXVT () {
     getvar "$username"
     username=$value
-    su - $username
-    yaourt --noconfirm -S rxvt-unicode-256xresources > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
-    exit
+    runuser -l $username -c 'yaourt --noconfirm -S rxvt-unicode-256xresources > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"'
 }
