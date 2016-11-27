@@ -78,7 +78,7 @@ linkDotFiles () {
 installDefaultDotFiles () {
     getvar "username"
     username=$value
-    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/dotfiles.git /tmp/dotfiles && cp -f /tmp/dotfiles/.* ~/. && rm -rf ~/.git" > /dev/null 2> /tmp/err || errorDialog "Failed to install the default Happy Hacking dotfiles :/"
+    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/dotfiles.git /tmp/dotfiles && cp -rf /tmp/dotfiles/.* /home/$username/. && rm -rf ~/.git" > /dev/null 2> /tmp/err || errorDialog "Failed to install the default Happy Hacking dotfiles :/"
 }
 
 installZSH () {

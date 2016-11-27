@@ -190,7 +190,7 @@ startingStep () {
 
     setvar "name" $name
     setvar "username" $username
-    setvar "dotFilesRepo" $dotFilesRepo
+    setvar "dot-files-repo" $dotFilesRepo
 
     setvar "starting-step" "done"
     partitionStep
