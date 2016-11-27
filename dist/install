@@ -225,7 +225,6 @@ installDesktop () {
            xmobar \
            feh \
            unclutter \
-           firefox \
            scrot \
            dmenu > /dev/null 2> /tmp/err || errorDialog "Failed to install desktop packages. Are you connected to internet?"
 
@@ -270,6 +269,9 @@ installFonts () {
     runuser -l $username -c 'yaourt -S --noconfirm \
            ttf-mac-fonts \
            system-san-francisco-font-git \
+           noto-fonts-emoji \
+           ttf-emojione-color \
+           adobe-base-14-fonts \
            ttf-monaco > /dev/null 2> /tmp/err || errorDialog "Failed to install Mac fonts. Are you connected to internet?"'
 }
 
