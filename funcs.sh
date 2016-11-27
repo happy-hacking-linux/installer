@@ -90,8 +90,7 @@ installZSH () {
 installOhMyZSH () {
     getvar "$username"
     username=$value
-
-    runuser -l $username -c 'yaourt --noconfirm -S oh-my-zsh-git > /dev/null 3> /tmp/err || errorDialog "Cannot install oh-my-zsh, are your connected to internet?"'
+    runuser -l $username -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
 }
 
 installVirtualBox () {
