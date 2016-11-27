@@ -92,7 +92,9 @@ rebootStep () {
     rebootDialog
 
     if [ "$selected" = "0" ]; then
-        dialog --infobox "Cya!" 10 50; sleep 3 && reboot
+        dialog --infobox "Cya!" 5 50; sleep 1
+        exit
+        reboot
     else
         mainMenuStep
     fi
