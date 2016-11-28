@@ -74,7 +74,7 @@ linkDotFiles () {
     getvar "username"
     username=$value
     dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
-    runuser -l $username -c "git clone $1 /home/$username/${dotFilesBase} && ln -f -s /home/$username/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone $1 /home/$username/${dotFilesBase} && ln -sfn /home/$username/${dotFilesBase}/.* ~/." > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
 installDefaultDotFiles () {
