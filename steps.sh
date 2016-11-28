@@ -63,6 +63,28 @@ installYaourtStep () {
     setvar "install-yaourt-step" "done"
 }
 
+findBestMirrorsStep () {
+    getvar "find-best-mirrors-step"
+    if [ "$value" == "done" ]; then
+        return
+    fi
+
+    dialog --infobox "Looking for faster and more up-to-date mirrors for rest of the installation..." 6 50; findBestMirrors
+
+    setvar "find-best-mirrors-step"
+}
+
+installBasicPackagesStep () {
+    getvar "install-basic-packages-step"
+    if [ "$value" == "done" ]; then
+        return
+    fi
+
+    dialog --infobox "Installing some basic packages before creating users..." 5 50; installBasicPackages
+
+    setvar "install-basic-packages-step"
+}
+
 installPackagesStep () {
     getvar "install-packages-step"
     if [ "$value" == "done" ]; then
@@ -116,7 +138,8 @@ usersStep () {
   getvar "username"
   username=$value
 
-  dialog --infobox "Installing some basic packages before creating users..." 5 50; installBasicPackages
+  installBasicPackagesStep
+  findBestMirrorsStep
 
   createUser $username $password
 

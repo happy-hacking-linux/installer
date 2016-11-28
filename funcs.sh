@@ -26,10 +26,10 @@ installCoreSystem () {
     pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
 
+    setvar "core-install-step" "done"
+
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
-
-    setvar "core-install-step" "done"
 
     arch-chroot /mnt <<EOF
 cd /usr/local/installer
@@ -116,9 +116,14 @@ installBasicPackages () {
            openssh \
            wget \
            git \
-           grep  > /dev/null 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
+           reflector \
+           grep > /dev/null 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
 
     installZSH
+}
+
+findBestMirrors () {
+    reflector --latest 200 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
 
 installYaourt () {
