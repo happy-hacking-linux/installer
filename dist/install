@@ -180,9 +180,7 @@ installZSH () {
 }
 
 installOhMyZSH () {
-    getvar "$username"
-    username=$value
-    runuser -l $username -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
+    runAsUser 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
 }
 
 installVirtualBox () {
@@ -209,13 +207,10 @@ installBasicPackages () {
 }
 
 installYaourt () {
-    getvar "username"
-    username=$value
-
-    runuser -l $username -c "git clone https://aur.archlinux.org/package-query.git /tmp/package-query" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
-    runuser -l $username -c "cd /tmp/package-query && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build package-query."
-    runuser -l $username -c "git clone https://aur.archlinux.org/yaourt.git /tmp/yaourt" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
-    runuser -l $username -c "cd /tmp/yaourt && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build Yaourt"
+    runAsUser "git clone https://aur.archlinux.org/package-query.git /tmp/package-query" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
+    runAsUser "cd /tmp/package-query && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build package-query."
+    runAsUser "git clone https://aur.archlinux.org/yaourt.git /tmp/yaourt" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
+    runAsUser "cd /tmp/yaourt && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build Yaourt"
 }
 
 installDesktop () {
@@ -255,9 +250,7 @@ installFonts () {
     pacman -S --noconfirm \
            ttf-symbola> /dev/null 2> /tmp/err || errorDialog "Failed to install fonts"
 
-    getvar "$username"
-    username=$value
-    runuser -l $username -c 'yaourt -S --noconfirm \
+    runAsUser 'yaourt -S --noconfirm \
            ttf-mac-fonts \
            system-san-francisco-font-git \
            noto-fonts-emoji \
@@ -267,9 +260,14 @@ installFonts () {
 }
 
 installURXVT () {
-    getvar "$username"
+    runAsUser 'yaourt --noconfirm -S rxvt-unicode-256xresources > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"'
+}
+
+runAsUser () {
+    # run given command as a non-root user
+    getvar "username"
     username=$value
-    runuser -l $username -c 'yaourt --noconfirm -S rxvt-unicode-256xresources > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"'
+    runuser -l $username -c $1
 }
 CHECK="[OK]"
 
