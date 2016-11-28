@@ -29,6 +29,8 @@ installCoreSystem () {
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
 
+    setvar "core-install-step" "done"
+
     arch-chroot /mnt <<EOF
 cd /usr/local/installer
 curl -L $DISTRO_DL > ./install

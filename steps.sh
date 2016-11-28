@@ -36,7 +36,7 @@ installDotFilesStep () {
     dotFilesRepo=$value
 
     if [[ -n "${dotFilesRepo// }" ]]; then
-        dialog --infobox "Linking your dotfiles into ~/" 5 50; linkDotFiles $1
+        dialog --infobox "Linking your dotfiles into ~/" 5 50; linkDotFiles $dotFilesRepo
 
         dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
         if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
@@ -136,11 +136,10 @@ localizeStep () {
 coreInstallStep () {
     getvar "core-install-step"
     if [ "$value" != "done" ]; then
-        dialog --infobox "Installing core system packages, please wait..." 10 50; installCoreSystem
+        dialog --infobox "Installing core system packages, please wait..." 6 50; installCoreSystem
         setvar "core-install-step" "done"
     fi
 
-    setvar "core-install-step" "done"
     usersStep
 }
 
