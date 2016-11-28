@@ -38,8 +38,11 @@ chmod +x ./install
 pacman -S --noconfirm dialog
 ./install continue 2> ./error-logs
 EOF
-    echo "Ciao!"
-    reboot
+
+    if [ -f /tmp/reboot ]; then
+        echo "Ciao!"
+        reboot
+    fi
 }
 
 installGRUB () {

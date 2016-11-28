@@ -128,8 +128,11 @@ chmod +x ./install
 pacman -S --noconfirm dialog
 ./install continue 2> ./error-logs
 EOF
-    echo "Ciao!"
-    reboot
+
+    if [ -f /tmp/reboot ]; then
+        echo "Ciao!"
+        reboot
+    fi
 }
 
 installGRUB () {
@@ -562,6 +565,7 @@ exitStep () {
            --no-label "Main Menu" \
            --yesno "Installation seems to be done, let's reboot your system. Don't forget ejecting the installation disk." 13 55
     if [ "$?" = "0" ]; then
+        touch /tmp/reboot
         exit
     else
         mainMenuStep

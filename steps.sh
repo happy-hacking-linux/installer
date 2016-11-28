@@ -96,6 +96,7 @@ exitStep () {
            --no-label "Main Menu" \
            --yesno "Installation seems to be done, let's reboot your system. Don't forget ejecting the installation disk." 13 55
     if [ "$?" = "0" ]; then
+        touch /tmp/reboot
         exit
     else
         mainMenuStep
