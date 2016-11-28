@@ -165,7 +165,7 @@ linkDotFiles () {
     username=$value
     dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
     target=/home/$username/$dotFilesBase
-    runuser -l $username -c "git clone $1 $target && cd $target && for file in .*; do cd /home/$username && rm -rf $file && ln -s $target/$file $file; done" > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone $1 $target && cd $target && for file in .*; do cd /home/$username && rm -rf \$file && ln -s $target/\$file \$file; done" > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
 installDefaultDotFiles () {
