@@ -95,7 +95,7 @@ installZSH () {
 }
 
 installOhMyZSH () {
-    runAsUser 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
+    runAsUser 'yaourt -S --noconfirm oh-my-zsh-git > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"'
 }
 
 installVirtualBox () {
