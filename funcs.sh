@@ -95,7 +95,7 @@ installZSH () {
 }
 
 installOhMyZSH () {
-    runAsUser 'yaourt -S --noconfirm oh-my-zsh-git > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"'
+    runAsUser "yaourt -S --noconfirm oh-my-zsh-git" 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
 }
 
 installVirtualBox () {
@@ -117,7 +117,7 @@ installBasicPackages () {
            wget \
            git \
            reflector \
-           grep > /dev/null 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
+           grep 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
 
     installZSH
 }
@@ -176,11 +176,11 @@ installFonts () {
            noto-fonts-emoji \
            ttf-emojione-color \
            adobe-base-14-fonts \
-           ttf-monaco > /dev/null 2> /tmp/err || errorDialog "Failed to install Mac fonts. Are you connected to internet?"'
+           ttf-monaco' 2> /tmp/err || errorDialog "Failed to install Mac fonts. Are you connected to internet?"
 }
 
 installURXVT () {
-    runAsUser 'yaourt --noconfirm -S rxvt-unicode-256xresources > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"'
+    runAsUser 'yaourt --noconfirm -S rxvt-unicode-256xresources'  > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
 }
 
 runAsUser () {
