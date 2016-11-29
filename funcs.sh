@@ -187,5 +187,5 @@ runAsUser () {
     # run given command as a non-root user
     getvar "username"
     username=$value
-    runuser -l $username -c $1
+    runuser -l $username -c "$1"
 }
