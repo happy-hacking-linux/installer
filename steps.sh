@@ -20,6 +20,7 @@ mainMenuStep () {
     elif [ "$selected" = "5" ]; then
         localizeStep
     elif [ "$selected" = "6" ]; then
+        connectToInternetStep
         exitStep
     fi
 }
@@ -27,7 +28,7 @@ mainMenuStep () {
 installVirtualBoxStep () {
     # Install VirtualBox Guest additions if the installation is running in a VirtualBox machine
     if lspci | grep -i virtualbox -q; then
-        dialog --infobox "Installing VirtualBox Guest Additions" 5 50; installVirtualBox
+        dialog --infobox "Looks like this is a VirtualBox setup, hold on please..." 5 50; installVirtualBox
     fi
 }
 
@@ -36,11 +37,11 @@ installDotFilesStep () {
     dotFilesRepo=$value
 
     if [[ -n "${dotFilesRepo// }" ]]; then
-        dialog --infobox "Linking your dotfiles into ~/" 5 50; linkDotFiles $dotFilesRepo
+        dialog --infobox "Fingers crossed, we're linking your dotfiles into ~/" 5 50; linkDotFiles $dotFilesRepo
 
         dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
         if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
-            dialog --infobox "Running personal post-install commands..." 5 50; runuser -l $username -c "sh /home/$username/$dotFilesBase/post-install.sh"
+            dialog --infobox "Running personal post-install commands, I hope we won't screw up anything" 5 50; runuser -l $username -c "sh /home/$username/$dotFilesBase/post-install.sh"
         fi
     fi
 }
@@ -80,8 +81,7 @@ installBasicPackagesStep () {
         return
     fi
 
-    dialog --infobox "Installing some basic packages..." 5 50; installBasicPackages
-
+    installBasicPackages "Basic Packages"
     setvar "install-basic-packages-step" "done"
 }
 
@@ -105,18 +105,14 @@ installPackagesStep () {
 
     upgradeStep
     findBestMirrorsStep
+
     installBasicPackagesStep
-
     installYaourtStep
-
-    dialog --infobox "Installing Oh My ZSH..." 5 50; installOhMyZSH
-    dialog --infobox "Installing Programming Packages..." 5 50; installDevTools
-    dialog --infobox "Installing CLI Utilities..." 5 50; installDevTools
-    dialog --infobox "Installing Fonts..." 5 50; installFonts
-    dialog --infobox "Installing 256 Color Terminal (URXVT)..." 5 50; installURXVT
-    dialog --infobox "Installing Xmonad Desktop..." 5 50; installDesktop
+    installOhMyZSH
+    installFonts
+    installURXVT
+    installXmonadDesktop
     dialog --infobox "Installing Default Configuration..." 5 50; installDefaultDotFiles
-
     installDotFilesStep
     installVirtualBoxStep
     installBootStep
@@ -124,6 +120,11 @@ installPackagesStep () {
     setvar "install-packages-step" "done"
 
     localizeStep
+}
+
+connectToInternetStep () {
+    # currently just enables eth0 or enp0s3
+    dialog --infobox "Connecting to internet..." 5 50; connectToInternet
 }
 
 exitStep () {

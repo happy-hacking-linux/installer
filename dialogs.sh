@@ -1,29 +1,15 @@
 CHECK="[OK]"
 
 startingDialogs () {
-    name=$(dialog --stdout \
-                  --title "=^.^=" \
-                  --backtitle "Happy Hacking Linux" \
-                  --defaultno \
-                  --ok-label "Next" \
-                  --nocancel \
-                  --inputbox "Oh, hai. What is your name?" 8 55 "$name")
-
-    username=$(echo "$name" | sed -e 's/[^[:alnum:]]/-/g' | tr -s '-' | tr A-Z a-z)
-
-    username=$(dialog --stdout \
-                      --title "=^.^=" \
-                      --backtitle "Happy Hacking Linux" \
-                      --ok-label "Next" \
-                      --nocancel \
-                      --inputbox "And your username preference?" 8 55 "$username")
+    nameDialog
+    usernameDialog
 
     dotFilesRepo=$(dialog --stdout \
                       --title "=^.^=" \
                       --backtitle "Happy Hacking Linux" \
                       --ok-label "Next" \
                       --cancel-label "Skip" \
-                      --inputbox "Where is your dotfiles located?" 8 55 "https://github.com/$username/dotfiles.git")
+                      --inputbox "Where is your dotfiles, $name?" 8 55 "https://github.com/$username/dotfiles.git")
 }
 
 mainMenu () {
@@ -132,18 +118,38 @@ partitionSelectionForm () {
     fi
 }
 
-usernameDialog () {
-    username=$(dialog --stdout \
-                      --title "Creating Users" \
+
+
+nameDialog () {
+    name=$(dialog --stdout \
+                      --title "=^.^" \
                       --backtitle "Happy Hacking Linux" \
-                      --ok-label "Done" \
+                      --ok-label "Next" \
                       --nocancel \
-                      --inputbox "Choose your username" 8 50)
+                      --inputbox "Oh, hai! What's your name?" 8 55)
+
+    if [[ -z "${name// }" ]]; then
+        dialog --title "=^.^=" \
+               --backtitle "Happy Hacking Linux" \
+               --msgbox "Type your name please, or make something up" 5 55
+        nameDialog
+    fi
+}
+
+usernameDialog () {
+    username=$(echo "$name" | sed -e 's/[^[:alnum:]]/-/g' | tr -s '-' | tr A-Z a-z)
+
+    username=$(dialog --stdout \
+                      --title "=^.^" \
+                      --backtitle "Happy Hacking Linux" \
+                      --ok-label "Next" \
+                      --nocancel \
+                      --inputbox "...and your favorite username?" 8 55 "$username")
 
     if [[ -z "${username// }" ]]; then
-        dialog --title "Creating Users" \
+        dialog --title "=^.^=" \
                --backtitle "Happy Hacking Linux" \
-               --msgbox "A username is required, try again" 5 50
+               --msgbox "A username is required, try again" 5 55
         usernamedDialog
     fi
 }
@@ -190,4 +196,15 @@ errorDialog () {
 
     rm /tmp/err
     mainMenuStep
+}
+
+installationProgress () {
+    total=37
+    instcounter=$((instcounter+1))
+    percent=$((100*$instcounter/$total))
+
+    echo $percent | dialog --title "Installation" \
+                           --backtitle "Happy Hacking Linux" \
+                           --gauge "Downloading package: $1" \
+                           7 70 0
 }

@@ -39,14 +39,14 @@ pacman -S --noconfirm dialog
 ./install continue 2> ./error-logs
 EOF
 
-    if [ -f /tmp/reboot ]; then
+    if [ -f /mnt/tmp/reboot ]; then
         echo "Ciao!"
         reboot
     fi
 }
 
 installGRUB () {
-    pacman -S --noconfirm grub > /dev/null 2> /tmp/err || errorDialog "Failed to install GRUB. Are you connected to internet?"
+    installPkg "grub"
     getvar "disk"
     grub-install --target=i386-pc --recheck $value > /dev/null 2> /tmp/err || errorDialog "Something got screwed and we failed to run grub-install"
     grub-mkconfig -o /boot/grub/grub.cfg > /dev/null 2> /tmp/err || errorDiaolog "Something got screwed up and we failed to create GRUB config."
@@ -90,37 +90,42 @@ installDefaultDotFiles () {
 }
 
 installZSH () {
-    pacman --noconfirm -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
-    chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
+    installPkg "zsh"
 
+    chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
     getvar "username"
     username=$value
     chsh -s $(which zsh) $username > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
 }
 
 installOhMyZSH () {
-    runAsUser "yaourt -S --noconfirm oh-my-zsh-git" 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
+    getvar "username"
+    username=$value
+
+    installAurPkg "oh-my-zsh-git"
+    cp /usr/share/oh-my-zsh/zshrc /home/$username/.zshrc
 }
 
 installVirtualBox () {
-    if lspci | grep -i virtualbox -q; then
-        pacman --noconfirm -S virtualbox-guest-utils virtualbox-guest-modules-arch virtualbox-guest-dkms
-        echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
-        systemctl enable vboxservice.service
-    fi
+    installPkg "virtualbox-guest-modules-arch"
+    installPkg "virtualbox-guest-utils"
+    echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
+    systemctl enable vboxservice.service
 }
 
 installBasicPackages () {
-    pacman -S --noconfirm \
-           base-devel \
-           net-tools \
-           pkgfile \
-           xf86-video-vesa \
-           openssh \
-           wget \
-           git \
-           grep 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
-
+    installPkg "base-devel"
+    installPkg "net-tools"
+    installPkg "pkgfile"
+    installPkg "xf86-video-vesa"
+    installPkg "openssh"
+    installPkg "wget"
+    installPkg "git"
+    installPkg "acpi"
+    installPkg "powertop"
+    installPkg "htop"
+    installPkg "python"
+    installPkg "python-pip"
     installZSH
 }
 
@@ -129,7 +134,8 @@ upgrade () {
 }
 
 findBestMirrors () {
-    pacman -S --noconfirm reflector 2> /tmp/err || errorDialog "Failed to install reflector, are you connected to internet?"
+    installPkg "reflector"
+
     reflector --latest 200 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
 
@@ -140,54 +146,44 @@ installYaourt () {
     runAsUser "cd /tmp/yaourt && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build Yaourt"
 }
 
-installDesktop () {
-    pacman -S --noconfirm \
-           xorg \
-           xorg-xinit \
-           xmonad \
-           xmonad-contrib \
-           xmobar \
-           feh \
-           unclutter \
-           scrot \
-           dmenu > /dev/null 2> /tmp/err || errorDialog "Failed to install desktop packages. Are you connected to internet?"
+installXmonadDesktop () {
+    installPkg "xorg"
+    installPkg "xorg-xinit"
+    installPkg "xmonad"
+    installPkg "xmonad-contrib"
+    installPkg "xmobar"
+    installPkg "feh"
+    installPkg "unclutter"
+    installPkg "scrot"
+    installPkg "dmenu"
+    installPkg "alsa-utils"
+    installPkg "mplayer"
+    installPkg "moc"
 }
 
-installDevTools () {
-    pacman -S --noconfirm \
-           python \
-           python-pip > /dev/null 2> /tmp/err || errorDialog "Failed to install programming packages. Are you connected to internet?"
-}
-
-installCLITools () {
-    pacman -S --noconfirm \
-           acpi \
-           powertop \
-           htop > /dev/null 2> /tmp/err || errorDialog "Failed to install command-line utilities. Are you connected to internet?"
-}
-
-installMedia () {
-    pacman -S --noconfirm \
-        alsa-utils \
-        mplayer \
-        moc > /dev/null 2> /tmp/err || errorDialog "Failed to install media"
+installXfce4Desktop () {
+    installPkg "xfce4"
 }
 
 installFonts () {
-    pacman -S --noconfirm \
-           ttf-symbola> /dev/null 2> /tmp/err || errorDialog "Failed to install fonts"
-
-    runAsUser 'yaourt -S --noconfirm \
-           ttf-mac-fonts \
-           system-san-francisco-font-git \
-           noto-fonts-emoji \
-           ttf-emojione-color \
-           adobe-base-14-fonts \
-           ttf-monaco' 2> /tmp/err || errorDialog "Failed to install Mac fonts. Are you connected to internet?"
+    installPkg "ttf-symbola"
+    installAurPkg "ttf-monaco"
+    installAurPkg "noto-fonts-emoji"
+    installAurPkg "ttf-emojione-color"
 }
 
 installURXVT () {
-    runAsUser 'yaourt --noconfirm -S rxvt-unicode-256xresources'  > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
+    installAurPkg "rxvt-unicode-256xresources"  > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
+}
+
+installPkg () {
+    installationProgress "$1"
+    pacman -S --noconfirm "$1" > /dev/null 2> /tmp/err || errorDialog "Something went wrong with installing $1. Try again."
+}
+
+installAurPkg () {
+    installationProgress "$1"
+    runAsUser "yaourt -S --noconfirm $1" > /dev/null 2> /tmp/err || errorDialog "Something went wrong with installing $1. Try again."
 }
 
 runAsUser () {
@@ -195,4 +191,14 @@ runAsUser () {
     getvar "username"
     username=$value
     runuser -l $username -c "$1"
+}
+
+connectToInternet () {
+    if ip link show | grep -i eth0 -q; then
+        systemctl enable dhcpcd@eth0.service
+    fi
+
+    if ip link show | grep -i enp0s3 -q; then
+        systemctl enable dhcpcd@eth0.service
+    fi
 }
