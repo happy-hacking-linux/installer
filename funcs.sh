@@ -91,8 +91,11 @@ installDefaultDotFiles () {
 
 installZSH () {
     pacman --noconfirm -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
-    chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default root shell to ZSH."
-    runAsUser "chsh -s $(which zsh)" > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we couldn't change your default shell to ZSH."
+    chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
+
+    getvar "username"
+    username=$value
+    chsh -s $(which zsh) $username > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
 }
 
 installOhMyZSH () {
