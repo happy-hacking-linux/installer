@@ -91,7 +91,8 @@ installDefaultDotFiles () {
 
 installZSH () {
     pacman --noconfirm -S zsh > /dev/null 2> /tmp/err || errorDialog "Can not install ZSH. Are you connected to internet?"
-    chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default shell to ZSH."
+    chsh -s $(which zsh) > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we can't change the default root shell to ZSH."
+    runAsUser "chsh -s $(which zsh)" > /dev/null 2> /tmp/err || errorDialog "Something got screwed up, we couldn't change your default shell to ZSH."
 }
 
 installOhMyZSH () {
@@ -107,7 +108,6 @@ installVirtualBox () {
 }
 
 installBasicPackages () {
-    pacman --noconfirm -Syu > /dev/null 2> /tmp/err || errorDialog "Failed to install some basic packages."
     pacman -S --noconfirm \
            base-devel \
            net-tools \
@@ -116,13 +116,17 @@ installBasicPackages () {
            openssh \
            wget \
            git \
-           reflector \
            grep 2> /tmp/err || errorDialog "Failed to install basic packages. Check your internet connection please."
 
     installZSH
 }
 
+upgrade () {
+    pacman --noconfirm -Syu > /dev/null 2> /tmp/err || errorDialog "Failed to upgrade the system. Make sure being connected to internet."
+}
+
 findBestMirrors () {
+    pacman -S --noconfirm reflector 2> /tmp/err || errorDialog "Failed to install reflector, are you connected to internet?"
     reflector --latest 200 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
 

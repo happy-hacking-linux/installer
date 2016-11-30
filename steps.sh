@@ -71,7 +71,7 @@ findBestMirrorsStep () {
 
     dialog --infobox "Looking for faster and more up-to-date mirrors for rest of the installation..." 6 50; findBestMirrors
 
-    setvar "find-best-mirrors-step"
+    setvar "find-best-mirrors-step" "done"
 }
 
 installBasicPackagesStep () {
@@ -80,9 +80,20 @@ installBasicPackagesStep () {
         return
     fi
 
-    dialog --infobox "Installing some basic packages before creating users..." 5 50; installBasicPackages
+    dialog --infobox "Installing some basic packages..." 5 50; installBasicPackages
 
-    setvar "install-basic-packages-step"
+    setvar "install-basic-packages-step" "done"
+}
+
+upgradeStep () {
+    getvar "upgrade-step"
+    if [ "$value" == "done" ]; then
+        return
+    fi
+
+    dialog --infobox "Upgrading the system..." 5 50; upgrade
+
+    setvar "upgrade-step" "done"
 }
 
 installPackagesStep () {
@@ -91,6 +102,10 @@ installPackagesStep () {
         localizeStep
         return
     fi
+
+    upgradeStep
+    findBestMirrorsStep
+    installBasicPackagesStep
 
     installYaourtStep
 
@@ -137,9 +152,6 @@ usersStep () {
 
   getvar "username"
   username=$value
-
-  installBasicPackagesStep
-  findBestMirrorsStep
 
   createUser $username $password
 
