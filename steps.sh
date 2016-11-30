@@ -173,7 +173,7 @@ localizeStep () {
 coreInstallStep () {
     getvar "core-install-step"
     if [ "$value" != "done" ]; then
-        dialog --infobox "Installing core system packages, please wait..." 6 50; installCoreSystem
+        dialog --infobox "Bootstrapping the core system, it may take a while depending on your connection." 6 50; installCoreSystem
         setvar "core-install-step" "done"
     fi
 

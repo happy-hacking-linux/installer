@@ -289,7 +289,7 @@ connectToInternet () {
     fi
 
     if ip link show | grep -i enp0s3 -q; then
-        systemctl enable dhcpcd@eth0.service
+        systemctl enable dhcpcd@enp0s3.service
     fi
 }
 CHECK="[OK]"
@@ -677,7 +677,7 @@ localizeStep () {
 coreInstallStep () {
     getvar "core-install-step"
     if [ "$value" != "done" ]; then
-        dialog --infobox "Installing core system packages, please wait..." 6 50; installCoreSystem
+        dialog --infobox "Bootstrapping the core system, it may take a while depending on your connection." 6 50; installCoreSystem
         setvar "core-install-step" "done"
     fi
 

@@ -199,6 +199,6 @@ connectToInternet () {
     fi
 
     if ip link show | grep -i enp0s3 -q; then
-        systemctl enable dhcpcd@eth0.service
+        systemctl enable dhcpcd@enp0s3.service
     fi
 }
