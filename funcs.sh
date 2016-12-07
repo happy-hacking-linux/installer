@@ -167,6 +167,7 @@ installXfce4Desktop () {
 
 installFonts () {
     installPkg "ttf-symbola"
+    installPkg "ttf-dejavu"
     installAurPkg "ttf-monaco"
     installAurPkg "noto-fonts-emoji"
     installAurPkg "ttf-emojione-color"
