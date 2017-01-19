@@ -215,6 +215,25 @@ partitionStep () {
     coreInstallStep
 }
 
+networkStep () {
+    getvar "network-step"
+    if [ "$value" == "done" ]; then
+        partitionStep
+    fi
+
+    gateway=`ip r | grep default | cut -d ' ' -f 3` 
+    test=$(ping -q -w 1 -c 1 $gateway> /dev/null && echo 1 || echo 0)
+
+    if [ $test -eq 1 ]; then
+        setvar "network-step" "done"
+        partitionStep
+    else
+        wifi-menu
+        setvar "network-step" "done"
+        partitionStep
+    fi
+}
+
 startingStep () {
     getvar "starting-step"
     if [ "$value" == "done" ]; then
@@ -229,7 +248,7 @@ startingStep () {
     setvar "dot-files-repo" $dotFilesRepo
 
     setvar "starting-step" "done"
-    partitionStep
+    networkStep
 }
 
 if [ "$command" = "continue" ]; then
