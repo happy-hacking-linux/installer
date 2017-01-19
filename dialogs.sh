@@ -114,6 +114,7 @@ partitionSelectionForm () {
                --msgbox "Sorry, you have to choose the partition you'd like to install the system." 6 50
         partitionSelectionForm
     else
+        mount $systempt /mnt
         setvar "system-partition" $systempt
     fi
 }

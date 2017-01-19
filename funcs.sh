@@ -126,6 +126,8 @@ installBasicPackages () {
     installPkg "htop"
     installPkg "python"
     installPkg "python-pip"
+    installPkg "wpa_supplicant"
+    installPkg "mc"
     installZSH
 }
 

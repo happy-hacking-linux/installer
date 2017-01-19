@@ -229,8 +229,7 @@ networkStep () {
         partitionStep
     else
         wifi-menu
-        setvar "network-step" "done"
-        partitionStep
+        networkStep
     fi
 }
 
