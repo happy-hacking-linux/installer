@@ -216,6 +216,8 @@ installBasicPackages () {
     installPkg "htop"
     installPkg "python"
     installPkg "python-pip"
+    installPkg "wpa_supplicant"
+    installPkg "mc"
     installZSH
 }
 
@@ -409,6 +411,7 @@ partitionSelectionForm () {
                --msgbox "Sorry, you have to choose the partition you'd like to install the system." 6 50
         partitionSelectionForm
     else
+        mount $systempt /mnt
         setvar "system-partition" $systempt
     fi
 }
@@ -734,8 +737,7 @@ networkStep () {
         partitionStep
     else
         wifi-menu
-        setvar "network-step" "done"
-        partitionStep
+        networkStep
     fi
 }
 
