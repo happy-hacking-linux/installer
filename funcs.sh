@@ -30,11 +30,10 @@ installCoreSystem () {
 
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
+    cp autorun.sh /mnt/usr/local/installer/install
 
     arch-chroot /mnt <<EOF
 cd /usr/local/installer
-curl -L $DISTRO_DL > ./install
-chmod +x ./install
 pacman -S --noconfirm dialog
 ./install continue 2> ./error-logs
 EOF
@@ -127,7 +126,9 @@ installBasicPackages () {
     installPkg "python"
     installPkg "python-pip"
     installPkg "wpa_supplicant"
+    installPkg "wpa_actiond"
     installPkg "mc"
+    installPkg "networkmanager"
     installZSH
 }
 
@@ -197,11 +198,5 @@ runAsUser () {
 }
 
 connectToInternet () {
-    if ip link show | grep -i eth0 -q; then
-        systemctl enable dhcpcd@eth0.service
-    fi
-
-    if ip link show | grep -i enp0s3 -q; then
-        systemctl enable dhcpcd@enp0s3.service
-    fi
+    systemctl enable NetworkManager.service
 }
