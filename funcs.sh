@@ -1,5 +1,3 @@
-DISTRO_DL="https://git.io/v1JNj"
-
 init () {
     timedetect1 set-ntp true
 }
@@ -129,6 +127,7 @@ installBasicPackages () {
     installPkg "wpa_actiond"
     installPkg "mc"
     installPkg "networkmanager"
+    installPkg "httpie"
     installZSH
 }
 
