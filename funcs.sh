@@ -128,6 +128,7 @@ installBasicPackages () {
     installPkg "mc"
     installPkg "networkmanager"
     installPkg "httpie"
+    installPkg "dnsutils"
     installZSH
 }
 
