@@ -200,7 +200,7 @@ errorDialog () {
 }
 
 installationProgress () {
-    total=42
+    total=43
     instcounter=$((instcounter+1))
     percent=$((100*$instcounter/$total))
 
