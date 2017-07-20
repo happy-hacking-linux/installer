@@ -114,6 +114,7 @@ partitionSelectionForm () {
                --msgbox "Sorry, you have to choose the partition you'd like to install the system." 6 50
         partitionSelectionForm
     else
+        yes | mkfs.ext4 $systempt > /dev/null 2> /tmp/err || error "Failed to format the root partition"
         mount $systempt /mnt
         setvar "system-partition" $systempt
     fi
