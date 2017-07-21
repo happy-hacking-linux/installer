@@ -108,7 +108,7 @@ partitionSelectionForm () {
 
     systempt=$(echo "$values" | tail -n1)
 
-    dialog --title "Select Partitions" --yesno "Warning: $systempt will be formatted, continue?" 5 40
+    dialog --title "Select Partitions" --yesno "Warning: $systempt will be formatted, continue?" 7 40
 
     if [ "$?" != "0" ]; then
         systempt=""

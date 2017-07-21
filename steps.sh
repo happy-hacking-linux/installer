@@ -205,8 +205,8 @@ partitionStep () {
     partitionMenu $disk
 
     if [ "$selected" = "1" ]; then
-        dialog --title "Select Partitions" --yesno "Warning: Disk $disk will be formatted, continue?" 5 40
-        if [ "$?" != "0" ]; then
+        dialog --title "Select Partitions" --yesno "Warning: Disk $disk will be formatted, continue?" 7 40
+        if [ "$?" == "0" ]; then
             autoPartition $disk
         else
             partitionStep
