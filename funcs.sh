@@ -110,6 +110,14 @@ installVirtualBox () {
     systemctl enable vboxservice.service
 }
 
+installMacbook () {
+    installPkg "dkms"
+    installPkg "broadcom-wl-dkms"
+    installPkg "linux-headers"
+    echo -e "defaults.pcm.card 1\ndefaults.pcm.device 0\ndefaults.ctl.card 1" > /etc/asound.conf
+    systemctl enable bluetooth
+}
+
 installBasicPackages () {
     installPkg "base-devel"
     installPkg "net-tools"
@@ -129,6 +137,10 @@ installBasicPackages () {
     installPkg "networkmanager"
     installPkg "httpie"
     installPkg "dnsutils"
+    installPkg "tlp"
+    installPkg "blueberry"
+    installPkg "unzip"
+    installPkg "blueberry"
     installZSH
 }
 

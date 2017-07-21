@@ -32,6 +32,13 @@ installVirtualBoxStep () {
     fi
 }
 
+installMacbookStep () {
+    # Install Macbook if the installation is running in a Macbook
+    if lspci | grep -i thunderbolt -q; then
+        dialog --infobox "Looks like this is a Macbook, I'll do some adjustments for you..." 5 50; installMacbook
+    fi
+}
+
 installDotFilesStep () {
     getvar "dot-files-repo"
     dotFilesRepo=$value
@@ -49,8 +56,12 @@ installDotFilesStep () {
 installBootStep () {
     getvar "boot-install-step"
     if [ "$value" != "done" ]; then
-        dialog --infobox "Installing GRUB for /boot" 5 50; installGRUB
-        setvar "boot-install-step" "done"
+        dialog --title "Setup Boot" --yesno "Do you want me to override existing boot with new one ? Warning: You may lose access to a parallel system if exists." 8 40
+
+        if [ "$?" == "0" ]; then
+            dialog --infobox "Installing GRUB for /boot" 5 50; installGRUB
+            setvar "boot-install-step" "done"
+        fi
     fi
 }
 
@@ -115,6 +126,7 @@ installPackagesStep () {
     dialog --infobox "Installing Default Configuration..." 5 50; installDefaultDotFiles
     installDotFilesStep
     installVirtualBoxStep
+    installMacbookStep
     installBootStep
 
     setvar "install-packages-step" "done"
@@ -193,7 +205,12 @@ partitionStep () {
     partitionMenu $disk
 
     if [ "$selected" = "1" ]; then
-        autoPartition $disk
+        dialog --title "Select Partitions" --yesno "Warning: Disk $disk will be formatted, continue?" 5 40
+        if [ "$?" != "0" ]; then
+            autoPartition $disk
+        else
+            partitionStep
+        fi
     elif [ "$selected" = "2" ]; then
         cfdisk $disk
         partitionSelectionForm $disk
@@ -221,7 +238,7 @@ networkStep () {
         partitionStep
     fi
 
-    gateway=`ip r | grep default | cut -d ' ' -f 3` 
+    gateway=`ip r | grep default | cut -d ' ' -f 3`
     test=$(ping -q -w 1 -c 1 $gateway> /dev/null && echo 1 || echo 0)
 
     if [ $test -eq 1 ]; then

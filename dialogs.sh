@@ -108,6 +108,12 @@ partitionSelectionForm () {
 
     systempt=$(echo "$values" | tail -n1)
 
+    dialog --title "Select Partitions" --yesno "Warning: $systempt will be formatted, continue?" 5 40
+
+    if [ "$?" != "0" ]; then
+        systempt=""
+    fi
+
     if [[ -z "${systempt// }" ]]; then
         dialog --title "Select System Partition" \
                --backtitle "Happy Hacking Linux" \
@@ -201,7 +207,7 @@ errorDialog () {
 }
 
 installationProgress () {
-    total=43
+    total=50
     instcounter=$((instcounter+1))
     percent=$((100*$instcounter/$total))
 

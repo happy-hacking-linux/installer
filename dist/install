@@ -88,8 +88,6 @@ tzSelectionMenu () {
 command_exists () {
     type "$1" &> /dev/null ;
 }
-DISTRO_DL="https://git.io/v1JNj"
-
 init () {
     timedetect1 set-ntp true
 }
@@ -202,6 +200,14 @@ installVirtualBox () {
     systemctl enable vboxservice.service
 }
 
+installMacbook () {
+    installPkg "dkms"
+    installPkg "broadcom-wl-dkms"
+    installPkg "linux-headers"
+    echo -e "defaults.pcm.card 1\ndefaults.pcm.device 0\ndefaults.ctl.card 1" > /etc/asound.conf
+    systemctl enable bluetooth
+}
+
 installBasicPackages () {
     installPkg "base-devel"
     installPkg "net-tools"
@@ -219,6 +225,12 @@ installBasicPackages () {
     installPkg "wpa_actiond"
     installPkg "mc"
     installPkg "networkmanager"
+    installPkg "httpie"
+    installPkg "dnsutils"
+    installPkg "tlp"
+    installPkg "blueberry"
+    installPkg "unzip"
+    installPkg "blueberry"
     installZSH
 }
 
@@ -396,9 +408,15 @@ partitionSelectionForm () {
                     --nocancel \
 	                  --form "" \
                     7 50 0 \
-	                  "Root Mount: "    2 1	"${1}1"  	2 15 45 0)
+	                  "Root: "    2 1	"${1}1"  	2 10 45 0)
 
     systempt=$(echo "$values" | tail -n1)
+
+    dialog --title "Select Partitions" --yesno "Warning: $systempt will be formatted, continue?" 5 40
+
+    if [ "$?" != "0" ]; then
+        systempt=""
+    fi
 
     if [[ -z "${systempt// }" ]]; then
         dialog --title "Select System Partition" \
@@ -493,7 +511,7 @@ errorDialog () {
 }
 
 installationProgress () {
-    total=42
+    total=50
     instcounter=$((instcounter+1))
     percent=$((100*$instcounter/$total))
 
@@ -536,6 +554,13 @@ installVirtualBoxStep () {
     fi
 }
 
+installMacbookStep () {
+    # Install Macbook if the installation is running in a Macbook
+    if lspci | grep -i thunderbolt -q; then
+        dialog --infobox "Looks like this is a Macbook, I'll do some adjustments for you..." 5 50; installMacbook
+    fi
+}
+
 installDotFilesStep () {
     getvar "dot-files-repo"
     dotFilesRepo=$value
@@ -553,8 +578,12 @@ installDotFilesStep () {
 installBootStep () {
     getvar "boot-install-step"
     if [ "$value" != "done" ]; then
-        dialog --infobox "Installing GRUB for /boot" 5 50; installGRUB
-        setvar "boot-install-step" "done"
+        dialog --title "Setup Boot" --yesno "Do you want me to override existing boot with new one ? Warning: You may lose access to a parallel system if exists." 8 40
+
+        if [ "$?" == "0" ]; then
+            dialog --infobox "Installing GRUB for /boot" 5 50; installGRUB
+            setvar "boot-install-step" "done"
+        fi
     fi
 }
 
@@ -619,6 +648,7 @@ installPackagesStep () {
     dialog --infobox "Installing Default Configuration..." 5 50; installDefaultDotFiles
     installDotFilesStep
     installVirtualBoxStep
+    installMacbookStep
     installBootStep
 
     setvar "install-packages-step" "done"
@@ -697,7 +727,12 @@ partitionStep () {
     partitionMenu $disk
 
     if [ "$selected" = "1" ]; then
-        autoPartition $disk
+        dialog --title "Select Partitions" --yesno "Warning: Disk $disk will be formatted, continue?" 5 40
+        if [ "$?" != "0" ]; then
+            autoPartition $disk
+        else
+            partitionStep
+        fi
     elif [ "$selected" = "2" ]; then
         cfdisk $disk
         partitionSelectionForm $disk
@@ -725,7 +760,7 @@ networkStep () {
         partitionStep
     fi
 
-    gateway=`ip r | grep default | cut -d ' ' -f 3` 
+    gateway=`ip r | grep default | cut -d ' ' -f 3`
     test=$(ping -q -w 1 -c 1 $gateway> /dev/null && echo 1 || echo 0)
 
     if [ $test -eq 1 ]; then
