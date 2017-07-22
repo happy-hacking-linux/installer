@@ -32,7 +32,7 @@ installCoreSystem () {
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
     cp autorun.sh /mnt/usr/local/installer/install
-    cp -r /etc/netctl /mnt/etc/netctl
+    cp -r /etc/NetworkManager/system-connections/. /mnt/etc/NetworkManager/system-connections/.
 
     arch-chroot /mnt <<EOF
 cd /usr/local/installer

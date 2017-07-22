@@ -122,7 +122,7 @@ installCoreSystem () {
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
     cp autorun.sh /mnt/usr/local/installer/install
-    cp -r /etc/netctl /mnt/etc/netctl
+    cp -r /etc/NetworkManager/system-connections/. /mnt/etc/NetworkManager/system-connections/.
 
     arch-chroot /mnt <<EOF
 cd /usr/local/installer
@@ -547,7 +547,6 @@ mainMenuStep () {
     elif [ "$selected" = "5" ]; then
         localizeStep
     elif [ "$selected" = "6" ]; then
-        connectToInternetStep
         exitStep
     fi
 }
@@ -666,7 +665,14 @@ connectToInternetStep () {
     dialog --infobox "Connecting to internet..." 5 50; connectToInternet
 }
 
+finishingStep() {
+  connectToInternet
+  tlp start
+}
+
 exitStep () {
+    dialog --infobox "Finishing touches..." 5 50; cfinishingStep
+
     dialog --title "=^.^=" \
            --backtitle "Happy Hacking Linux" \
            --yes-label "Reboot" \
@@ -772,7 +778,7 @@ networkStep () {
         setvar "network-step" "done"
         partitionStep
     else
-        wifi-menu
+        nmtui
         networkStep
     fi
 }

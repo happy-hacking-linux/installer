@@ -20,7 +20,6 @@ mainMenuStep () {
     elif [ "$selected" = "5" ]; then
         localizeStep
     elif [ "$selected" = "6" ]; then
-        connectToInternetStep
         exitStep
     fi
 }
@@ -139,7 +138,14 @@ connectToInternetStep () {
     dialog --infobox "Connecting to internet..." 5 50; connectToInternet
 }
 
+finishingStep() {
+  connectToInternet
+  tlp start
+}
+
 exitStep () {
+    dialog --infobox "Finishing touches..." 5 50; cfinishingStep
+
     dialog --title "=^.^=" \
            --backtitle "Happy Hacking Linux" \
            --yes-label "Reboot" \
@@ -245,7 +251,7 @@ networkStep () {
         setvar "network-step" "done"
         partitionStep
     else
-        wifi-menu
+        nmtui
         networkStep
     fi
 }
