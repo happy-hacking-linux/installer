@@ -21,6 +21,9 @@ installCoreSystem () {
     getvar "disk"
     disk=$value
 
+    pacman --noconfirm -Syu
+    dialog --infobox "Looking for faster and more up-to-date mirrors for rest of the installation..." 6 50; findBestMirrors
+
     pacstrap /mnt base
     genfstab -U /mnt >> /mnt/etc/fstab
 
@@ -29,6 +32,7 @@ installCoreSystem () {
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
     cp autorun.sh /mnt/usr/local/installer/install
+    cp -r /etc/netctl /mnt/etc/netctl
 
     arch-chroot /mnt <<EOF
 cd /usr/local/installer
@@ -135,6 +139,7 @@ installBasicPackages () {
     installPkg "wpa_actiond"
     installPkg "mc"
     installPkg "networkmanager"
+    installPkg "nmtui"
     installPkg "httpie"
     installPkg "dnsutils"
     installPkg "tlp"
@@ -149,7 +154,7 @@ upgrade () {
 }
 
 findBestMirrors () {
-    installPkg "reflector"
+    pacman --noconfirm -S reflector
 
     reflector --latest 200 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
