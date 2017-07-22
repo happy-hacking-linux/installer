@@ -146,6 +146,7 @@ installBasicPackages () {
     installPkg "blueberry"
     installPkg "unzip"
     installPkg "blueberry"
+    installPkg "xf86-input-synaptics"
     installZSH
 }
 
