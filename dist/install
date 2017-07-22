@@ -244,9 +244,9 @@ upgrade () {
 }
 
 findBestMirrors () {
-    pacman --noconfirm -S reflector
+    pacman --noconfirm -S reflector > /dev/null 2> /tmp/err || errorDialog "Something went wrong with installing reflector. Try again."
 
-    reflector --latest 200 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
+    reflector --latest 25 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
 
 installYaourt () {
