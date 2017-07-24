@@ -144,7 +144,7 @@ finishingStep() {
 }
 
 exitStep () {
-    dialog --infobox "Finishing touches..." 5 50; cfinishingStep
+    dialog --infobox "Finishing touches..." 5 50; finishingStep
 
     dialog --title "=^.^=" \
            --backtitle "Happy Hacking Linux" \

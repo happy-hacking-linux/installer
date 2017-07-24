@@ -31,7 +31,7 @@ installCoreSystem () {
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
     cp autorun.sh /mnt/usr/local/installer/install
-    mkdir -p /etc/NetworkManager/system-connections
+    mkdir -p /mnt/etc/NetworkManager/system-connections
     cp -r /etc/NetworkManager/system-connections/. /mnt/etc/NetworkManager/system-connections/.
     cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
