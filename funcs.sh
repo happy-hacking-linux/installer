@@ -32,7 +32,9 @@ installCoreSystem () {
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
     cp autorun.sh /mnt/usr/local/installer/install
+    mkdir -p /etc/NetworkManager/system-connections
     cp -r /etc/NetworkManager/system-connections/. /mnt/etc/NetworkManager/system-connections/.
+    cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
     arch-chroot /mnt <<EOF
 cd /usr/local/installer
@@ -139,13 +141,10 @@ installBasicPackages () {
     installPkg "wpa_actiond"
     installPkg "mc"
     installPkg "networkmanager"
-    installPkg "nmtui"
     installPkg "httpie"
     installPkg "dnsutils"
     installPkg "tlp"
-    installPkg "blueberry"
     installPkg "unzip"
-    installPkg "blueberry"
     installPkg "xf86-input-synaptics"
     installZSH
 }
@@ -178,8 +177,8 @@ installXmonadDesktop () {
     installPkg "scrot"
     installPkg "dmenu"
     installPkg "alsa-utils"
-    installPkg "mplayer"
     installPkg "moc"
+    installAurPkg "light-git"
 }
 
 installXfce4Desktop () {
@@ -196,6 +195,7 @@ installFonts () {
 
 installURXVT () {
     installAurPkg "rxvt-unicode-256xresources"  > /dev/null 2> /tmp/err || errorDialog "Failed to install RXVT-Unicode with 256 colors"
+    installPkg "urxvt-perls"
 }
 
 installPkg () {
@@ -217,4 +217,5 @@ runAsUser () {
 
 connectToInternet () {
     systemctl enable NetworkManager.service
+    systemctl start NetworkManager.service
 }

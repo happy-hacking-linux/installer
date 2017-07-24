@@ -114,7 +114,6 @@ installPackagesStep () {
     fi
 
     upgradeStep
-    findBestMirrorsStep
 
     installBasicPackagesStep
     installYaourtStep
@@ -139,6 +138,7 @@ connectToInternetStep () {
 }
 
 finishingStep() {
+  dialog --infobox "Downloading wallpaper..." 5 30; wget http://unsplash.com/photos/YsoS7vH3x_I/download?force=true -O /home/$username/wallpaper.jpg > /dev/null
   connectToInternet
   tlp start
 }
