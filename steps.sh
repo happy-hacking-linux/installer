@@ -252,7 +252,7 @@ networkStep () {
         partitionStep
     else
 	systemctl start NetworkManager
-        nmtui
+        nmtui connect
         networkStep
     fi
 }
