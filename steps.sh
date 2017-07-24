@@ -251,6 +251,7 @@ networkStep () {
         setvar "network-step" "done"
         partitionStep
     else
+	systemctl start NetworkManager
         nmtui
         networkStep
     fi
