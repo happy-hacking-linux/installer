@@ -243,7 +243,7 @@ upgrade () {
 }
 
 findBestMirrors () {
-    reflector --latest 50 -n 1 --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
+    reflector --latest 50 -n 1 --protocol http --connection-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
 
 installYaourt () {
