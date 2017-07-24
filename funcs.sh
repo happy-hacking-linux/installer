@@ -21,7 +21,6 @@ installCoreSystem () {
     getvar "disk"
     disk=$value
 
-    pacman --noconfirm -Syu
     dialog --infobox "Looking for faster and more up-to-date mirrors for rest of the installation..." 6 50; findBestMirrors
 
     pacstrap /mnt base
@@ -154,9 +153,7 @@ upgrade () {
 }
 
 findBestMirrors () {
-    pacman --noconfirm -S reflector > /dev/null 2> /tmp/err || errorDialog "Something went wrong with installing reflector. Try again."
-
-    reflector --latest 25 -n 1 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
+    reflector --latest 50 -n 1 --protocol https --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
 
 installYaourt () {
