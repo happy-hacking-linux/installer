@@ -20,3 +20,8 @@ You can install Arch Linux with this wizard by simply calling it;
 curl -L https://git.io/v1JNj | bash
 ```
 
+## Todo
+
+Tasks need to be done for the next release:
+
+* Add `playerctl` to the default setup. Xmonad config is ready to hook up with it.
