@@ -25,3 +25,4 @@ curl -L https://git.io/v1JNj | bash
 Tasks need to be done for the next release:
 
 * Add `playerctl` to the default setup. Xmonad config is ready to hook up with it.
+* Add `pacaur` to the default setup.
