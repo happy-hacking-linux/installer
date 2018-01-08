@@ -27,3 +27,4 @@ Tasks need to be done for the next release:
 * Add `playerctl` to the default setup. Xmonad config is ready to hook up with it.
 * Add `pacaur` to the default setup.
 * Detect if the system is a notebook by running `dmidecode --string chassis-type` and do some customizations for laptops such as installing `laptop-mode-tools`
+* Add `fd-rs` to the default setup.
