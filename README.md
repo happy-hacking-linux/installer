@@ -28,4 +28,4 @@ Tasks need to be done for the next release:
 * Add `pacaur` to the default setup.
 * Detect if the system is a notebook by running `dmidecode --string chassis-type` and do some customizations for laptops such as installing `laptop-mode-tools`
 * Add `fd-rs` to the default setup.
-* Install Asian font sets by default
+* Install Asian font sets by default. (adobe-source-han-serif-otc-fonts and adobe-source-han-sans-otc-fonts)
