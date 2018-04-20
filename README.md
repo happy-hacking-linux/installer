@@ -31,3 +31,4 @@ Tasks need to be done for the next release:
 * Install Asian font sets by default. (adobe-source-han-serif-otc-fonts and adobe-source-han-sans-otc-fonts)
 * Read partition names under selected disk using `lsblk`. 
 * Install Rofi & make it default app selector
+* Diff http://termbin.com/3vfor
