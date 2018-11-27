@@ -85,10 +85,12 @@ linkDotFiles () {
     runuser -l $username -c "git clone $1 $target && cd $target && for file in .*; do cd /home/$username && rm -rf \$file && ln -s $target/\$file \$file; done" > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
-installDefaultDotFiles () {
+installHappyDesktopConfig () {
     getvar "username"
     username=$value
-    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/dotfiles.git /tmp/dotfiles && cp -rf /tmp/dotfiles/.* /home/$username/. && rm -rf ~/.git" > /dev/null 2> /tmp/err || errorDialog "Failed to install the default Happy Hacking dotfiles :/"
+    runuser -l $username -c "git clone https://github.com/happy-hacking-linux/happy-desktop.git /home/$username/.happy-desktop" > /dev/null 2> /tmp/err || errorDialog "Failed to clone the default desktop configuration. Please check your connection."
+    runuser -l $username -c "cd /home/$username/.config && ln -s /home/$username/.happy-desktop/config/* ." > /dev/null 2> /dev/null
+    runuser -l $username -c "cd /home/$username && ln -s /home/$username/.happy-desktop/dotfiles/* ." > /dev/null 2> /dev/null
 }
 
 installZSH () {
@@ -145,7 +147,18 @@ installBasicPackages () {
     installPkg "tlp"
     installPkg "unzip"
     installPkg "xf86-input-synaptics"
+    installPkg "bat"
+    installPkg "prettyping"
+    installPkg "fzf"
+    installPkg "tldr"
+    installPkg "ack"
+    installPkg "tmux"
     installZSH
+}
+
+installPrinterSupport () {
+    installPkg "cups"
+    installPkg "avahi"
 }
 
 upgrade () {
@@ -157,24 +170,34 @@ findBestMirrors () {
 }
 
 installYaourt () {
+    installAurPkg "yay"
     runAsUser "git clone https://aur.archlinux.org/package-query.git /tmp/package-query" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
     runAsUser "cd /tmp/package-query && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build package-query."
     runAsUser "git clone https://aur.archlinux.org/yaourt.git /tmp/yaourt" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
     runAsUser "cd /tmp/yaourt && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build Yaourt"
 }
 
-installXmonadDesktop () {
+installI3Desktop () {
     installPkg "xorg"
     installPkg "xorg-xinit"
-    installPkg "xmonad"
-    installPkg "xmonad-contrib"
-    installPkg "xmobar"
+    installPkg "compton"
+    installPkg "i3-gaps"
+    installPkg "i3status"
+    installPkg "i3lock"
+    installPkg "rofi"
     installPkg "feh"
     installPkg "unclutter"
     installPkg "scrot"
     installPkg "dmenu"
     installPkg "alsa-utils"
     installPkg "moc"
+    installPkg "slop"
+    installPkg "playerctl"
+    installPkg "libnotify"
+    installPkg "dunst"
+    installPkg "qalculate-gtk"
+    installPkg "compton"
+    installAurPkg "polybar"
     installAurPkg "light-git"
 }
 
@@ -183,11 +206,13 @@ installXfce4Desktop () {
 }
 
 installFonts () {
-    installPkg "ttf-symbola"
     installPkg "ttf-dejavu"
+    installPkg "adobe-source-han-serif-otc-fonts"
+    installPkg "adobe-source-han-sans-otc-fonts"
     installAurPkg "ttf-monaco"
     installAurPkg "noto-fonts-emoji"
     installAurPkg "ttf-emojione-color"
+    installAurPkg "ttf-symbola"
 }
 
 installURXVT () {

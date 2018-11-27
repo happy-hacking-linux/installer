@@ -5,6 +5,7 @@ create-iso: clean build
 
 build:
 	@echo "Building dist/install"
+	@mkdir -p dist
 	@cat vars.sh timezone-selector.sh funcs.sh dialogs.sh steps.sh > dist/install
 	@chmod +x ./dist/install
 

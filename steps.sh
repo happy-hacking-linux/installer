@@ -44,11 +44,6 @@ installDotFilesStep () {
 
     if [[ -n "${dotFilesRepo// }" ]]; then
         dialog --infobox "Fingers crossed, we're linking your dotfiles into ~/" 5 50; linkDotFiles $dotFilesRepo
-
-        dotFilesBase=$(basename "$dotFilesRepo" | cut -f 1 -d '.')
-        if [ -f /home/$username/$dotFilesBase/post-install.sh ]; then
-            dialog --infobox "Running personal post-install commands, I hope we won't screw up anything" 5 50; runuser -l $username -c "sh /home/$username/$dotFilesBase/post-install.sh"
-        fi
     fi
 }
 
@@ -120,9 +115,9 @@ installPackagesStep () {
     installOhMyZSH
     installFonts
     installURXVT
-    installXmonadDesktop
-    dialog --infobox "Installing Default Configuration..." 5 50; installDefaultDotFiles
+    installI3Desktop
     installDotFilesStep
+    dialog --infobox "Configuring Happy Desktop..." 5 50; installHappyDesktopConfig
     installVirtualBoxStep
     installMacbookStep
     installBootStep
