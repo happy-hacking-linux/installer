@@ -89,8 +89,8 @@ installHappyDesktopConfig () {
     getvar "username"
     username=$value
     runuser -l $username -c "git clone https://github.com/happy-hacking-linux/happy-desktop.git /home/$username/.happy-desktop" > /dev/null 2> /tmp/err || errorDialog "Failed to clone the default desktop configuration. Please check your connection."
-    runuser -l $username -c "cd /home/$username/.config && ln -s /home/$username/.happy-desktop/config/* ." > /dev/null 2> /dev/null
-    runuser -l $username -c "cd /home/$username && ln -s /home/$username/.happy-desktop/dotfiles/* ." > /dev/null 2> /dev/null
+    runuser -l $username -c "cd /home/$username/.config && ln -sf /home/$username/.happy-desktop/config/* ." > /dev/null 2> /dev/null
+    runuser -l $username -c "cd /home/$username && ln -sf /home/$username/.happy-desktop/dotfiles/* ." > /dev/null 2> /dev/null
 }
 
 installZSH () {
@@ -110,6 +110,10 @@ installOhMyZSH () {
     cp /usr/share/oh-my-zsh/zshrc /home/$username/.zshrc
 }
 
+installYay () {
+    installAurPkg "yay"
+}
+
 installVirtualBox () {
     installPkg "virtualbox-guest-modules-arch"
     installPkg "virtualbox-guest-utils"
@@ -118,8 +122,6 @@ installVirtualBox () {
 }
 
 installMacbook () {
-    installPkg "dkms"
-    installPkg "broadcom-wl-dkms"
     installPkg "linux-headers"
     echo -e "defaults.pcm.card 1\ndefaults.pcm.device 0\ndefaults.ctl.card 1" > /etc/asound.conf
     systemctl enable bluetooth
@@ -170,7 +172,6 @@ findBestMirrors () {
 }
 
 installYaourt () {
-    installAurPkg "yay"
     runAsUser "git clone https://aur.archlinux.org/package-query.git /tmp/package-query" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
     runAsUser "cd /tmp/package-query && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build package-query."
     runAsUser "git clone https://aur.archlinux.org/yaourt.git /tmp/yaourt" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
@@ -197,6 +198,8 @@ installI3Desktop () {
     installPkg "dunst"
     installPkg "qalculate-gtk"
     installPkg "compton"
+    installPkg "udisks2"
+    installPkg "udiskie"
     installAurPkg "polybar"
     installAurPkg "light-git"
 }
@@ -220,6 +223,17 @@ installURXVT () {
     installPkg "urxvt-perls"
 }
 
+installRefind () {
+    installPkg "refind-efi"
+    runuser -l $username -c "refind-install" > /dev/null 2> /tmp/err
+    getvar "system-partition"
+    systempt=$value
+    getUUID $systempt
+    echo "\"Boot using default options\"     \"root=PARTUUID=$uuid rw add_efi_memmap\"" > /boot/refind_linux.conf
+    echo "\"Boot using fallback initramfs\"  \"root=PARTUUID=$uuid rw add_efi_memmap initrd=/boot/initramfs-linux-fallback.img\"" > /boot/refind_linux.conf
+    echo "\"Boot to terminal\"               \"root=PARTUUID=$uuid rw add_efi_memmap systemd.unit=multi-user.target\"" > /boot/refind_linux.conf
+}
+
 installPkg () {
     installationProgress "$1"
     pacman -S --noconfirm "$1" > /dev/null 2> /tmp/err || errorDialog "Something went wrong with installing $1. Try again."
@@ -240,4 +254,9 @@ runAsUser () {
 connectToInternet () {
     systemctl enable NetworkManager.service
     systemctl start NetworkManager.service
+}
+
+getUUID() {
+    name=$(sed  's/^\/dev\///' <<< $1)
+    uuid=$(/bin/ls -la /dev/disk/by-uuid | grep "$name"  | awk '{print $9}')
 }

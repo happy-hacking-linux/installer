@@ -55,6 +55,19 @@ installBootStep () {
         if [ "$?" == "0" ]; then
             dialog --infobox "Installing GRUB for /boot" 5 50; installGRUB
             setvar "boot-install-step" "done"
+        else
+            installRefindStep
+        fi
+    fi
+}
+
+installRefindStep () {
+    getvar "boot-install-step"
+    if [ "$value" != "done" ]; then
+        dialog --title "Setup rEFInd" --yesno "Do you need rEFInd to be installed?" 8 40
+
+        if [ "$?" == "0" ]; then
+            dialog --infobox "Installing rEFInd" 5 50; installRefind
         fi
     fi
 }
@@ -112,6 +125,7 @@ installPackagesStep () {
 
     installBasicPackagesStep
     installYaourtStep
+    installYay
     installOhMyZSH
     installFonts
     installURXVT
@@ -133,7 +147,6 @@ connectToInternetStep () {
 }
 
 finishingStep() {
-  dialog --infobox "Downloading wallpaper..." 5 30; wget http://unsplash.com/photos/YsoS7vH3x_I/download?force=true -O /home/$username/wallpaper.jpg > /dev/null
   connectToInternet
   tlp start
 }
