@@ -179,8 +179,9 @@ installHappyDesktopConfig () {
     getvar "username"
     username=$value
     runuser -l $username -c "git clone https://github.com/happy-hacking-linux/happy-desktop.git /home/$username/.happy-desktop" > /dev/null 2> /tmp/err || errorDialog "Failed to clone the default desktop configuration. Please check your connection."
-    runuser -l $username -c "cd /home/$username/.config && ln -sf /home/$username/.happy-desktop/config/* ." > /dev/null 2> /dev/null
-    runuser -l $username -c "cd /home/$username && ln -sf /home/$username/.happy-desktop/dotfiles/* ." > /dev/null 2> /dev/null
+    runuser -l $username -c "mkdir -p /home/$username/.config"
+    runuser -l $username -c "cd /home/$username/.config && ln -sf /home/$username/.happy-desktop/config/* ." > /dev/null 2>> /tmp/err || errorDialog "Failed to link desktop configuration."
+    runuser -l $username -c "cd /home/$username && ln -sf /home/$username/.happy-desktop/dotfiles/.* ." > /dev/null 2>> /tmp/err || errorDialog "Failed to link default dotfiles."
 }
 
 installZSH () {
@@ -213,7 +214,6 @@ installVirtualBox () {
 
 installMacbook () {
     installPkg "linux-headers"
-    echo -e "defaults.pcm.card 1\ndefaults.pcm.device 0\ndefaults.ctl.card 1" > /etc/asound.conf
     systemctl enable bluetooth
 }
 
@@ -290,6 +290,7 @@ installI3Desktop () {
     installPkg "compton"
     installPkg "udisks2"
     installPkg "udiskie"
+    installPkg "imagemagick"
     installAurPkg "polybar"
     installAurPkg "light-git"
 }
@@ -319,9 +320,9 @@ installRefind () {
     getvar "system-partition"
     systempt=$value
     getUUID $systempt
-    echo "\"Boot using default options\"     \"root=PARTUUID=$uuid rw add_efi_memmap\"" > /boot/refind_linux.conf
-    echo "\"Boot using fallback initramfs\"  \"root=PARTUUID=$uuid rw add_efi_memmap initrd=/boot/initramfs-linux-fallback.img\"" > /boot/refind_linux.conf
-    echo "\"Boot to terminal\"               \"root=PARTUUID=$uuid rw add_efi_memmap systemd.unit=multi-user.target\"" > /boot/refind_linux.conf
+    echo "\"Boot using default options\"     \"root=UUID=$uuid rw add_efi_memmap\"" > /boot/refind_linux.conf
+    echo "\"Boot using fallback initramfs\"  \"root=UUID=$uuid rw add_efi_memmap initrd=/boot/initramfs-linux-fallback.img\"" >> /boot/refind_linux.conf
+    echo "\"Boot to terminal\"               \"root=UUID=$uuid rw add_efi_memmap systemd.unit=multi-user.target\"" >> /boot/refind_linux.conf
 }
 
 installPkg () {
