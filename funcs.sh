@@ -201,6 +201,7 @@ installI3Desktop () {
     installPkg "udisks2"
     installPkg "udiskie"
     installPkg "imagemagick"
+    installPkg "maim"
     installAurPkg "polybar"
     installAurPkg "light-git"
 }
