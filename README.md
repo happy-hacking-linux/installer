@@ -33,3 +33,4 @@ Tasks need to be done for the next release:
 * Install Rofi & make it default app selector
 * Diff http://termbin.com/3vfor
 * Install `ttf-symbola` 
+* Install `udevil` instead of `udiskie`
