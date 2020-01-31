@@ -129,7 +129,7 @@ installPackagesStep () {
     installOhMyZSH
     installFonts
     installURXVT
-    installI3Desktop
+    installSwayDesktop
     installDotFilesStep
     dialog --infobox "Configuring Happy Desktop..." 5 50; installHappyDesktopConfig
     installVirtualBoxStep

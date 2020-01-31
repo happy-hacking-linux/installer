@@ -124,6 +124,7 @@ installVirtualBox () {
 
 installMacbook () {
     installPkg "linux-headers"
+    installAurPkg "bcwc-pcie-git" # Webcam support
     systemctl enable bluetooth
 }
 
@@ -141,7 +142,6 @@ installBasicPackages () {
     installPkg "python"
     installPkg "python-pip"
     installPkg "wpa_supplicant"
-    installPkg "wpa_actiond"
     installPkg "mc"
     installPkg "networkmanager"
     installPkg "httpie"
@@ -155,6 +155,14 @@ installBasicPackages () {
     installPkg "tldr"
     installPkg "ack"
     installPkg "tmux"
+    installPkg "ranger"
+    installPkg "lsd"
+    installPkg "fd"
+    installPkg "ripgrep"
+    installPkg "irssi"
+    installPkg "skm"
+    installPkg "tree"
+    installPkg "bandwhich"
     installZSH
 }
 
@@ -176,6 +184,24 @@ installYaourt () {
     runAsUser "cd /tmp/package-query && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build package-query."
     runAsUser "git clone https://aur.archlinux.org/yaourt.git /tmp/yaourt" > /dev/null 2> /tmp/err || errorDialog "Can not access Arch Linux repositories, check your internet connection."
     runAsUser "cd /tmp/yaourt && yes | makepkg -si" > /dev/null 2> /tmp/err || errorDialog "Failed to build Yaourt"
+}
+
+installSwayDesktop () {
+    installPkg "sway"
+    installPkg "swaybg"
+    installPkg "swayidle"
+    installPkg "swaylock"
+    installPkg "alacritty-git"
+    installPkg "grim"
+    installPkg "rofi"
+    installPkg "waybar"
+    installPkg "feh"
+    installPkg "alsa-utils"
+    installPkg "playerctl"
+    installPkg "mako"
+    installPkg "qalculate-gtk"
+    installPkg "waybar"
+    installPkg "ffmpeg"
 }
 
 installI3Desktop () {
@@ -202,6 +228,7 @@ installI3Desktop () {
     installPkg "udiskie"
     installPkg "imagemagick"
     installPkg "maim"
+    installPkg "network-manager-applet"
     installAurPkg "polybar"
     installAurPkg "light-git"
 }
