@@ -204,6 +204,7 @@ installBasicPackages () {
     installPkg "b43-fwcutter"
     installPkg "broadcom-wl"
     installPkg "vim"
+    installPkg "libnotify"
     installAurPkg "skm"
     installZSH
 }
@@ -248,6 +249,7 @@ installSwayDesktop () {
     installPkg "xorg-server-xwayland"
     installPkg "imagemagick"
     installPkg "xdpyinfo"
+    installPkg "slurp"
 }
 
 installI3Desktop () {
