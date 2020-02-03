@@ -88,6 +88,163 @@ tzSelectionMenu () {
 command_exists () {
     type "$1" &> /dev/null ;
 }
+declare -A countries
+countries[1]="Australia"
+countries[2]="Austria"
+countries[3]="Bangladesh"
+countries[4]="Belarus"
+countries[5]="Belgium"
+countries[6]="Bosnia_and_Herzegovina"
+countries[7]="Brazil"
+countries[8]="Bulgaria"
+countries[9]="Canada"
+countries[10]="Chile"
+countries[11]="China"
+countries[12]="Colombia"
+countries[13]="Croatia"
+countries[14]="Czechia"
+countries[15]="Denmark"
+countries[16]="Ecuador"
+countries[17]="Finland"
+countries[18]="France"
+countries[19]="Georgia"
+countries[20]="Germany"
+countries[21]="Greece"
+countries[22]="Hong_Kong"
+countries[23]="Hungary"
+countries[24]="Iceland"
+countries[25]="India"
+countries[26]="Indonesia"
+countries[27]="Iran"
+countries[28]="Ireland"
+countries[29]="Israel"
+countries[30]="Italy"
+countries[31]="Japan"
+countries[32]="Kazakhstan"
+countries[33]="Kenya"
+countries[34]="Latvia"
+countries[35]="Lithuania"
+countries[36]="Luxembourg"
+countries[37]="Netherlands"
+countries[38]="New_Caledonia"
+countries[39]="New_Zealand"
+countries[40]="North_Macedonia"
+countries[41]="Norway"
+countries[42]="Paraguay"
+countries[43]="Philippines"
+countries[44]="Poland"
+countries[45]="Portugal"
+countries[46]="Romania"
+countries[47]="Russia"
+countries[48]="Serbia"
+countries[49]="Singapore"
+countries[50]="Slovakia"
+countries[51]="Slovenia"
+countries[52]="South_Africa"
+countries[53]="South_Korea"
+countries[54]="Spain"
+countries[55]="Sweden"
+countries[56]="Switzerland"
+countries[57]="Taiwan"
+countries[58]="Thailand"
+countries[59]="Turkey"
+countries[60]="Ukraine"
+countries[61]="United_Kingdom"
+countries[62]="United_States"
+countries[63]="Vietnam"
+
+declare -A country_codes
+country_codes[1]="AU"
+country_codes[2]="AT"
+country_codes[3]="BD"
+country_codes[4]="BY"
+country_codes[5]="BE"
+country_codes[6]="BA"
+country_codes[7]="BR"
+country_codes[8]="BG"
+country_codes[9]="CA"
+country_codes[10]="CL"
+country_codes[11]="CN"
+country_codes[12]="CO"
+country_codes[13]="HR"
+country_codes[14]="CZ"
+country_codes[15]="DK"
+country_codes[16]="EC"
+country_codes[17]="FI"
+country_codes[18]="FR"
+country_codes[19]="GE"
+country_codes[20]="DE"
+country_codes[21]="GR"
+country_codes[22]="HK"
+country_codes[23]="HU"
+country_codes[24]="IS"
+country_codes[25]="IN"
+country_codes[26]="ID"
+country_codes[27]="IR"
+country_codes[28]="IE"
+country_codes[29]="IL"
+country_codes[30]="IT"
+country_codes[31]="JP"
+country_codes[32]="KZ"
+country_codes[33]="KE"
+country_codes[34]="LV"
+country_codes[35]="LT"
+country_codes[36]="LU"
+country_codes[37]="NL"
+country_codes[38]="NC"
+country_codes[39]="NZ"
+country_codes[40]="MK"
+country_codes[41]="NO"
+country_codes[42]="PY"
+country_codes[43]="PH"
+country_codes[44]="PL"
+country_codes[45]="PT"
+country_codes[46]="RO"
+country_codes[47]="RU"
+country_codes[48]="RS"
+country_codes[49]="SG"
+country_codes[50]="SK"
+country_codes[51]="SI"
+country_codes[52]="ZA"
+country_codes[53]="KR"
+country_codes[54]="ES"
+country_codes[55]="SE"
+country_codes[56]="CH"
+country_codes[57]="TW"
+country_codes[58]="TH"
+country_codes[59]="TR"
+country_codes[60]="UA"
+country_codes[61]="GB"
+country_codes[62]="US"
+country_codes[63]="VN"
+
+selectMirrorRegions() {
+    checklist=""
+    for i in {1..63}
+    do
+        checklist="$checklist $i ${countries[$i]} off"
+    done
+
+    mirror_regions=$(dialog --stdout --checklist "Choose Mirror Regions:" 25 40 15 $checklist)
+    if [[ -z "${mirror_regions// }" ]]; then
+        selectMirrorRegions
+    fi
+}
+
+createMirrorList() {
+    selectMirrorRegions
+
+    args=""
+    for i in $mirror_regions
+    do
+        echo "$i"
+        args="$args --country ${country_codes[$i]}"
+    done
+
+
+    cmd="reflector $args --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
+    dialog --infobox "Searching the best mirror in given regions... " 5 50; eval $cmd
+}
 init () {
     timedetect1 set-ntp true
 }
@@ -113,7 +270,7 @@ installCoreSystem () {
 
     dialog --infobox "Looking for faster and more up-to-date mirrors for rest of the installation..." 6 50; findBestMirrors
 
-    pacstrap /mnt base
+    pacstrap /mnt base linux linux-firmware
     genfstab -U /mnt >> /mnt/etc/fstab
 
     setvar "core-install-step" "done"
@@ -121,13 +278,14 @@ installCoreSystem () {
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
     cp autorun.sh /mnt/usr/local/installer/install
-    mkdir -p /mnt/etc/NetworkManager/system-connections
-    cp -r /etc/NetworkManager/system-connections/. /mnt/etc/NetworkManager/system-connections/.
     cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
+
+    mkdir -p /mnt/etc/netctl
+    cp /etc/netctl/* /mnt/etc/netctl/.
 
     arch-chroot /mnt <<EOF
 cd /usr/local/installer
-pacman -S --noconfirm dialog
+pacman -S --noconfirm zsh dialog
 ./install continue 2> ./error-logs
 EOF
 
@@ -172,7 +330,8 @@ linkDotFiles () {
     username=$value
     dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
     target=/home/$username/$dotFilesBase
-    runuser -l $username -c "git clone $1 $target && cd $target && for file in .*; do cd /home/$username && rm -rf \$file && ln -s $target/\$file \$file; done" > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone $1 $target"
+    #runuser -l $username -c "git clone $1 $target && cd $target && for file in .*; do cd /home/$username && rm -rf \$file && ln -s $target/\$file \$file; done" > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
 installHappyDesktopConfig () {
@@ -213,7 +372,7 @@ installVirtualBox () {
 }
 
 installMacbook () {
-    installPkg "linux-headers"
+    echo "options snd-hda-intel index=1,0" > /etc/modprobe.d/alsa.conf
     installAurPkg "bcwc-pcie-git" # Webcam support
     systemctl enable bluetooth
 }
@@ -233,7 +392,6 @@ installBasicPackages () {
     installPkg "python-pip"
     installPkg "wpa_supplicant"
     installPkg "mc"
-    installPkg "networkmanager"
     installPkg "httpie"
     installPkg "dnsutils"
     installPkg "tlp"
@@ -250,9 +408,18 @@ installBasicPackages () {
     installPkg "fd"
     installPkg "ripgrep"
     installPkg "irssi"
-    installPkg "skm"
     installPkg "tree"
     installPkg "bandwhich"
+    installPkg "wireless-regdb"
+    installPkg "wireless_tools"
+    installPkg "netctl"
+    installPkg "ntfs-3g"
+    installPkg "dhclient"
+    installPkg "dhcpcd"
+    installPkg "b43-fwcutter"
+    installPkg "broadcom-wl"
+    installPkg "vim"
+    installAurPkg "skm"
     installZSH
 }
 
@@ -266,7 +433,7 @@ upgrade () {
 }
 
 findBestMirrors () {
-    reflector --latest 50 -n 1 --protocol http --connection-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
+    createMirrorList > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
 
 installYaourt () {
@@ -281,7 +448,7 @@ installSwayDesktop () {
     installPkg "swaybg"
     installPkg "swayidle"
     installPkg "swaylock"
-    installPkg "alacritty-git"
+    installPkg "alacritty"
     installPkg "grim"
     installPkg "rofi"
     installPkg "waybar"
@@ -292,6 +459,8 @@ installSwayDesktop () {
     installPkg "qalculate-gtk"
     installPkg "waybar"
     installPkg "ffmpeg"
+    installPkg "jq"
+    installPkg "xorg-server-xwayland"
 }
 
 installI3Desktop () {
@@ -333,8 +502,6 @@ installFonts () {
     installPkg "adobe-source-han-sans-otc-fonts"
     installAurPkg "ttf-monaco"
     installAurPkg "noto-fonts-emoji"
-    installAurPkg "ttf-emojione-color"
-    installAurPkg "ttf-symbola"
 }
 
 installURXVT () {
@@ -370,16 +537,15 @@ runAsUser () {
     runuser -l $username -c "$1"
 }
 
-connectToInternet () {
-    systemctl enable NetworkManager.service
-    systemctl start NetworkManager.service
-}
-
 getUUID() {
     name=$(sed  's/^\/dev\///' <<< $1)
     uuid=$(/bin/ls -la /dev/disk/by-uuid | grep "$name"  | awk '{print $9}')
 }
 CHECK="[OK]"
+
+battery() {
+    echo "| Battery: $(acpi | grep 'Battery' | sed 's/Battery\s[0-9]*: \w*, //' | sed 's/\%.*//')%"
+}
 
 startingDialogs () {
     nameDialog
@@ -387,7 +553,7 @@ startingDialogs () {
 
     dotFilesRepo=$(dialog --stdout \
                       --title "=^.^=" \
-                      --backtitle "Happy Hacking Linux" \
+                      --backtitle "Happy Hacking Linux $(battery)" \
                       --ok-label "Next" \
                       --cancel-label "Skip" \
                       --inputbox "Where is your dotfiles, $name?" 8 55 "https://github.com/$username/dotfiles.git")
@@ -427,7 +593,7 @@ mainMenu () {
 
     selected=$(dialog --stdout \
                       --title "=^.^=" \
-                      --backtitle "Happy Hacking Linux" \
+                      --backtitle "Happy Hacking Linux $(battery)" \
                       --ok-label "Select" \
                       --cancel-label "Welcome Screen" \
                       --menu "Complete the following installation steps one by one." 16 55 8 \
@@ -450,7 +616,7 @@ diskMenu () {
 
     selected=$(dialog --stdout \
                       --title "Installation Disk" \
-                      --backtitle "Happy Hacking Linux" \
+                      --backtitle "Happy Hacking Linux $(battery)" \
                       --ok-label "Next" \
                       --cancel-label "Main Menu" \
                       --menu "Select A Disk" \
@@ -467,7 +633,7 @@ diskMenu () {
 partitionMenu () {
     selected=$(dialog --stdout \
                       --title "Setup Disk Partitions" \
-                      --backtitle "Happy Hacking Linux" \
+                      --backtitle "Happy Hacking Linux $(battery)" \
                       --ok-label "Select" \
                       --cancel-label "Main Menu" \
                       --menu "How do you want to create partitions? If you got nothing to lose in $1, just go with the simple option and format the disk completely. Or, choose one of the tools to modify your disk in your own risk." 17 55 5 \
@@ -480,12 +646,12 @@ partitionMenu () {
 partitionSelectionForm () {
     values=$(dialog --stdout \
                     --ok-label "Done" \
-	                  --backtitle "Happy Hacking Linux" \
+	                  --backtitle "Happy Hacking Linux $(battery)" \
 	                  --title "Select Partitions" \
                     --nocancel \
 	                  --form "" \
                     7 50 0 \
-	                  "Root: "    2 1	"${1}1"  	2 10 45 0)
+	                  "Root Partition:"    2 1	"${1}X"  	2 18 35 0)
 
     systempt=$(echo "$values" | tail -n1)
 
@@ -497,12 +663,12 @@ partitionSelectionForm () {
 
     if [[ -z "${systempt// }" ]]; then
         dialog --title "Select System Partition" \
-               --backtitle "Happy Hacking Linux" \
+               --backtitle "Happy Hacking Linux $(battery)" \
                --msgbox "Sorry, you have to choose the partition you'd like to install the system." 6 50
         partitionSelectionForm
     else
         yes | mkfs.ext4 $systempt > /dev/null 2> /tmp/err || error "Failed to format the root partition"
-        mount $systempt /mnt
+        mount $systempt /mnt > /dev/null 2> /tmp/err || error "Failed to mount the root partition"
         setvar "system-partition" $systempt
     fi
 }
@@ -512,14 +678,14 @@ partitionSelectionForm () {
 nameDialog () {
     name=$(dialog --stdout \
                       --title "=^.^" \
-                      --backtitle "Happy Hacking Linux" \
+                      --backtitle "Happy Hacking Linux $(battery)" \
                       --ok-label "Next" \
                       --nocancel \
                       --inputbox "Oh, hai! What's your name?" 8 55)
 
     if [[ -z "${name// }" ]]; then
         dialog --title "=^.^=" \
-               --backtitle "Happy Hacking Linux" \
+               --backtitle "Happy Hacking Linux $(battery)" \
                --msgbox "Type your name please, or make something up" 5 55
         nameDialog
     fi
@@ -530,14 +696,14 @@ usernameDialog () {
 
     username=$(dialog --stdout \
                       --title "=^.^" \
-                      --backtitle "Happy Hacking Linux" \
+                      --backtitle "Happy Hacking Linux $(battery)" \
                       --ok-label "Next" \
                       --nocancel \
                       --inputbox "...and your favorite username?" 8 55 "$username")
 
     if [[ -z "${username// }" ]]; then
         dialog --title "=^.^=" \
-               --backtitle "Happy Hacking Linux" \
+               --backtitle "Happy Hacking Linux $(battery)" \
                --msgbox "A username is required, try again" 5 55
         usernamedDialog
     fi
@@ -546,28 +712,28 @@ usernameDialog () {
 passwordDialog () {
     password=$(dialog --stdout \
                            --title "Creating User" \
-                           --backtitle "Happy Hacking Linux" \
+                           --backtitle "Happy Hacking Linux $(battery)" \
                            --ok-label "Done" \
                            --nocancel \
                            --passwordbox "Type a new password:" 8 50)
 
     passwordRepeat=$(dialog --stdout \
                             --title "Creating User" \
-                            --backtitle "Happy Hacking Linux" \
+                            --backtitle "Happy Hacking Linux $(battery)" \
                             --ok-label "Done" \
                             --nocancel \
                             --passwordbox "Verify your new password:" 8 50)
 
     if [ "$password" != "$passwordRepeat" ]; then
         dialog --title "Password" \
-               --backtitle "Happy Hacking Linux" \
+               --backtitle "Happy Hacking Linux $(battery)" \
                --msgbox "Passwords you've typed don't match. Try again." 5 50
         passwordDialog
     fi
 
     if [[ -z "${password// }" ]]; then
         dialog --title "Password" \
-               --backtitle "Happy Hacking Linux" \
+               --backtitle "Happy Hacking Linux $(battery)" \
                --msgbox "A password is required. Try again please." 5 50
         passwordDialog
     fi
@@ -580,7 +746,7 @@ errorDialog () {
     echo "Message: $1\nOutput: \n" | cat - /tmp/err > /tmp/err.bak && mv /tmp/err.bak /tmp/err
 
     dialog --title "Oops, there was an error" \
-           --backtitle "Happy Hacking Linux" \
+           --backtitle "Happy Hacking Linux $(battery)" \
            --textbox /tmp/err 20 50
 
     rm /tmp/err
@@ -593,7 +759,7 @@ installationProgress () {
     percent=$((100*$instcounter/$total))
 
     echo $percent | dialog --title "Installation" \
-                           --backtitle "Happy Hacking Linux" \
+                           --backtitle "Happy Hacking Linux $(battery)" \
                            --gauge "Downloading package: $1" \
                            7 70 0
 }
@@ -721,7 +887,6 @@ installPackagesStep () {
     fi
 
     upgradeStep
-
     installBasicPackagesStep
     installYaourtStep
     installYay
@@ -740,14 +905,12 @@ installPackagesStep () {
     localizeStep
 }
 
-connectToInternetStep () {
-    # currently just enables eth0 or enp0s3
-    dialog --infobox "Connecting to internet..." 5 50; connectToInternet
-}
-
 finishingStep() {
-  connectToInternet
-  tlp start
+    # Make sure brcmfmac is not blacklisted
+    sed -i '/brcmfmac/d' /usr/lib/modprobe.d/broadcom-wl.conf 2> /dev/null
+    # Enable the wifi interface
+    systemctl enable netctl-auto@$(iw dev | awk '$1=="Interface"{print $2}')
+    tlp start
 }
 
 exitStep () {
@@ -858,9 +1021,9 @@ networkStep () {
         setvar "network-step" "done"
         partitionStep
     else
-	systemctl start NetworkManager
-        nmtui connect
-        networkStep
+        wifi-menu
+        sleep 1
+        ./autorun.sh network
     fi
 }
 
@@ -883,6 +1046,8 @@ startingStep () {
 
 if [ "$command" = "continue" ]; then
     usersStep
+elif [ "$command" = "network" ]; then
+    networkStep
 else
     startingStep
 fi

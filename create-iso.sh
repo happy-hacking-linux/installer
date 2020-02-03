@@ -3,7 +3,7 @@ TMP=./iso
 prepare () {
     sudo pacman -S archiso
     git clone git@github.com:happy-hacking-linux/iso.git $TMP
-    cp dist/install $TMP/configs/releng/airootfs/root/autorun.sh
+    cp dist/install $TMP/airootfs/root/autorun.sh
     build
 }
 

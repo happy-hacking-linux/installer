@@ -1,3 +1,4 @@
+
 command=$1
 
 mainMenuStep () {
@@ -122,13 +123,11 @@ installPackagesStep () {
     fi
 
     upgradeStep
-
     installBasicPackagesStep
     installYaourtStep
     installYay
     installOhMyZSH
     installFonts
-    installURXVT
     installSwayDesktop
     installDotFilesStep
     dialog --infobox "Configuring Happy Desktop..." 5 50; installHappyDesktopConfig
@@ -141,14 +140,12 @@ installPackagesStep () {
     localizeStep
 }
 
-connectToInternetStep () {
-    # currently just enables eth0 or enp0s3
-    dialog --infobox "Connecting to internet..." 5 50; connectToInternet
-}
-
 finishingStep() {
-  connectToInternet
-  tlp start
+    # Make sure brcmfmac is not blacklisted
+    sed -i '/brcmfmac/d' /usr/lib/modprobe.d/broadcom-wl.conf 2> /dev/null
+    # Enable the wifi interface
+    systemctl enable netctl-auto@$(iw dev | awk '$1=="Interface"{print $2}')
+    tlp start
 }
 
 exitStep () {
@@ -259,9 +256,9 @@ networkStep () {
         setvar "network-step" "done"
         partitionStep
     else
-	systemctl start NetworkManager
-        nmtui connect
-        networkStep
+        wifi-menu
+        sleep 1
+        ./autorun.sh network
     fi
 }
 
@@ -284,6 +281,8 @@ startingStep () {
 
 if [ "$command" = "continue" ]; then
     usersStep
+elif [ "$command" = "network" ]; then
+    networkStep
 else
     startingStep
 fi

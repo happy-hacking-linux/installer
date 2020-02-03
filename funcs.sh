@@ -23,7 +23,7 @@ installCoreSystem () {
 
     dialog --infobox "Looking for faster and more up-to-date mirrors for rest of the installation..." 6 50; findBestMirrors
 
-    pacstrap /mnt base
+    pacstrap /mnt base linux linux-firmware
     genfstab -U /mnt >> /mnt/etc/fstab
 
     setvar "core-install-step" "done"
@@ -31,13 +31,14 @@ installCoreSystem () {
     mkdir -p /mnt/usr/local/installer
     cp install-vars /mnt/usr/local/installer/.
     cp autorun.sh /mnt/usr/local/installer/install
-    mkdir -p /mnt/etc/NetworkManager/system-connections
-    cp -r /etc/NetworkManager/system-connections/. /mnt/etc/NetworkManager/system-connections/.
     cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
+
+    mkdir -p /mnt/etc/netctl
+    cp /etc/netctl/* /mnt/etc/netctl/.
 
     arch-chroot /mnt <<EOF
 cd /usr/local/installer
-pacman -S --noconfirm dialog
+pacman -S --noconfirm zsh dialog
 ./install continue 2> ./error-logs
 EOF
 
@@ -82,7 +83,8 @@ linkDotFiles () {
     username=$value
     dotFilesBase=$(basename "$1" | cut -f 1 -d '.')
     target=/home/$username/$dotFilesBase
-    runuser -l $username -c "git clone $1 $target && cd $target && for file in .*; do cd /home/$username && rm -rf \$file && ln -s $target/\$file \$file; done" > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
+    runuser -l $username -c "git clone $1 $target"
+    #runuser -l $username -c "git clone $1 $target && cd $target && for file in .*; do cd /home/$username && rm -rf \$file && ln -s $target/\$file \$file; done" > /dev/null 2> /tmp/err || errorDialog "Can not install dotfiles at $1 :/"
 }
 
 installHappyDesktopConfig () {
@@ -123,9 +125,41 @@ installVirtualBox () {
 }
 
 installMacbook () {
-    installPkg "linux-headers"
+    # Fix sound
+    echo "options snd-hda-intel index=1,0" > /etc/modprobe.d/alsa.conf
+
+    # Create a service to make fix suspend issues
+    cat <<EOT >> /etc/systemd/system/suspend-fix.service
+[Unit]
+Description=System service that makes sure Macbook Pro doesn't wake up when lid is closed
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "echo XHC1 > /proc/acpi/wakeup && echo LID0 > /proc/acpi/wakeup"
+
+[Install]
+WantedBy=multi-user.target
+EOT
+
+    systemctl enable suspend-fix
+
+    # Create a service to make fix suspend issues
+    cat <<EOT >> /etc/systemd/system/restart-network-after-suspend.service
+[Unit]
+Description=Restart network when resumed after suspend
+
+[Service]
+ExecStart=/bin/sh -c "modprobe -r brcmfmac && modprobe brcmfmac && sleep 1 && systemctl restart netctl"
+
+[Install]
+WantedBy=suspend.target
+EOT
+
+    systemctl enable restart-network-after-suspend
+
     installAurPkg "bcwc-pcie-git" # Webcam support
     systemctl enable bluetooth
+
 }
 
 installBasicPackages () {
@@ -143,7 +177,6 @@ installBasicPackages () {
     installPkg "python-pip"
     installPkg "wpa_supplicant"
     installPkg "mc"
-    installPkg "networkmanager"
     installPkg "httpie"
     installPkg "dnsutils"
     installPkg "tlp"
@@ -160,9 +193,18 @@ installBasicPackages () {
     installPkg "fd"
     installPkg "ripgrep"
     installPkg "irssi"
-    installPkg "skm"
     installPkg "tree"
     installPkg "bandwhich"
+    installPkg "wireless-regdb"
+    installPkg "wireless_tools"
+    installPkg "netctl"
+    installPkg "ntfs-3g"
+    installPkg "dhclient"
+    installPkg "dhcpcd"
+    installPkg "b43-fwcutter"
+    installPkg "broadcom-wl"
+    installPkg "vim"
+    installAurPkg "skm"
     installZSH
 }
 
@@ -176,7 +218,7 @@ upgrade () {
 }
 
 findBestMirrors () {
-    reflector --latest 50 -n 1 --protocol http --connection-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
+    createMirrorList > /dev/null 2> /tmp/err || errorDialog "Something got screwed up and we couldn't accomplish finding some fast and up-to-date servers :("
 }
 
 installYaourt () {
@@ -191,7 +233,7 @@ installSwayDesktop () {
     installPkg "swaybg"
     installPkg "swayidle"
     installPkg "swaylock"
-    installPkg "alacritty-git"
+    installPkg "alacritty"
     installPkg "grim"
     installPkg "rofi"
     installPkg "waybar"
@@ -202,6 +244,10 @@ installSwayDesktop () {
     installPkg "qalculate-gtk"
     installPkg "waybar"
     installPkg "ffmpeg"
+    installPkg "jq"
+    installPkg "xorg-server-xwayland"
+    installPkg "imagemagick"
+    installPkg "xdpyinfo"
 }
 
 installI3Desktop () {
@@ -228,7 +274,6 @@ installI3Desktop () {
     installPkg "udiskie"
     installPkg "imagemagick"
     installPkg "maim"
-    installPkg "network-manager-applet"
     installAurPkg "polybar"
     installAurPkg "light-git"
 }
@@ -243,8 +288,7 @@ installFonts () {
     installPkg "adobe-source-han-sans-otc-fonts"
     installAurPkg "ttf-monaco"
     installAurPkg "noto-fonts-emoji"
-    installAurPkg "ttf-emojione-color"
-    installAurPkg "ttf-symbola"
+    installAurPkg "system-san-francisco-font-git"
 }
 
 installURXVT () {
@@ -278,11 +322,6 @@ runAsUser () {
     getvar "username"
     username=$value
     runuser -l $username -c "$1"
-}
-
-connectToInternet () {
-    systemctl enable NetworkManager.service
-    systemctl start NetworkManager.service
 }
 
 getUUID() {
