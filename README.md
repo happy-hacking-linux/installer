@@ -34,3 +34,4 @@ Tasks need to be done for the next release:
 * Diff http://termbin.com/3vfor
 * Install `ttf-symbola` 
 * Install `udevil` instead of `udiskie`
+* trash-cli
